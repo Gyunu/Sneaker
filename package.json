@@ -1,0 +1,16 @@
+{
+	"name": "gyunu-sidewalk",
+	"version": "0.0.1",
+	"description": "A javascript front end MVC framework",
+	"main": "dist/js/index.js",
+	"scripts": {
+		"build": "tslint -indent tabs src/**/*.ts"
+	},
+	"author": "Gyunu",
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^1.8.10",
+		"webpack": "^1.13.0",
+		"ts-loader": "^0.8.2"
+	}
+}

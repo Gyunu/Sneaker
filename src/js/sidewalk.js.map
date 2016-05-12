@@ -1,0 +1,1 @@
+{"version":3,"file":"sidewalk.js","sourceRoot":"","sources":["../interfaces/ICreateComponentArgs.ts","../interfaces/ICreateModelArgs.ts","../interfaces/IRoute.ts","../interfaces/IRoutes.ts","../lib/model.ts","../lib/router.ts","../sidewalk.ts","../lib/template.ts","../lib/controller.ts"],"names":[],"mappings":""}

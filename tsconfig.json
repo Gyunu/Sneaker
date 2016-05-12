@@ -1,0 +1,31 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"declaration": true,
+		"target": "es5",
+		"sourceMap": true,
+		"outDir": "dist/js"
+	},
+	"filesGlob": [
+		"./src/**/*.ts",
+		"!node_modules/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	],
+	"files": [
+		"./src/index.ts",
+		"./src/interfaces/ICreateComponentArgs.ts",
+		"./src/interfaces/ICreateModelArgs.ts",
+		"./src/interfaces/IRoute.ts",
+		"./src/interfaces/IRoutes.ts",
+		"./src/lib/controller.ts",
+		"./src/lib/model.ts",
+		"./src/lib/router.ts",
+		"./src/lib/template.ts"
+	],
+	"atom": {
+		"rewriteTsconfig": true
+	}
+}
