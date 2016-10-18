@@ -1,0 +1,43 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"declaration": true,
+		"target": "es5",
+		"sourceMap": true,
+		"outDir": "../dist"
+	},
+	"filesGlob": [
+		"./**/*.ts",
+		"!node_modules/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	],
+	"atom": {
+		"rewriteTsconfig": true
+	},
+	"files": [
+		"./lib/boot.ts",
+		"./lib/controllers/databasemanager.ts",
+		"./lib/controllers/fieldmanager.ts",
+		"./lib/controllers/routemanager.ts",
+		"./lib/controllers/sectionmanager.ts",
+		"./lib/entities/entry.ts",
+		"./lib/entities/field.ts",
+		"./lib/entities/section.ts",
+		"./lib/interfaces/ICreateTableArgs.ts",
+		"./lib/interfaces/ICreateTableFieldArgs.ts",
+		"./lib/interfaces/IDatabaseJoinClause.ts",
+		"./lib/interfaces/IDatabaseSelectArgs.ts",
+		"./lib/interfaces/IDatabaseWhereClause.ts",
+		"./lib/interfaces/IFieldArgs.ts",
+		"./lib/interfaces/IInsertArgs.ts",
+		"./lib/interfaces/IQuery.ts",
+		"./lib/interfaces/IRoute.ts",
+		"./lib/interfaces/ISectionArgs.ts",
+		"./lib/routes/init.ts",
+		"./lib/toolkit/sqlite3.query.ts",
+		"./sneaker.ts"
+	]
+}

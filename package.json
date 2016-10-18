@@ -1,16 +1,22 @@
 {
-	"name": "gyunu-sidewalk",
+	"name": "sneaker",
 	"version": "0.0.1",
-	"description": "A javascript front end MVC framework",
-	"main": "dist/js/index.js",
-	"scripts": {
-		"build": "tslint -indent tabs src/**/*.ts"
+	"description": "An sqlite3 RESTful CMS",
+	"author": "tech@gyu.nu",
+	"dependencies": {
+		"q": "^1.4.1",
+		"sqlite3": "^3.1.3",
+		"sqlite3-transactions": "^0.0.5"
 	},
-	"author": "Gyunu",
-	"license": "MIT",
+	"main": "dist/sneaker.js",
+	"scripts": {
+		"build": "tslint -indent tabs src/**/*.ts; tsc -p src"
+	},
 	"devDependencies": {
-		"typescript": "^1.8.10",
-		"webpack": "^1.13.0",
-		"ts-loader": "^0.8.2"
-	}
+		"typescript": "^1.8.10"
+	},
+	"scripts": {
+	},
+	"private": true,
+	"license": "MIT"
 }
