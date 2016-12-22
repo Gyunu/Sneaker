@@ -1,22 +1,20 @@
 {
-	"name": "sneaker",
-	"version": "0.0.1",
-	"description": "An sqlite3 RESTful CMS",
-	"author": "tech@gyu.nu",
-	"dependencies": {
-		"q": "^1.4.1",
-		"sqlite3": "^3.1.3",
-		"sqlite3-transactions": "^0.0.5"
-	},
-	"main": "dist/sneaker.js",
-	"scripts": {
-		"build": "tslint -indent tabs src/**/*.ts; tsc -p src"
-	},
-	"devDependencies": {
-		"typescript": "^1.8.10"
-	},
-	"scripts": {
-	},
-	"private": true,
-	"license": "MIT"
+  "name": "sneaker",
+  "version": "0.0.1",
+  "description": "A SQLite3 REST API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "make:database": "node scripts/make-database.js",
+    "make:migration": "node scripts/make-migration.js",
+    "make:seeder": "node scripts/make-seeder.js",
+    "make:model": "node scripts/make-model.js",
+    "migrate": "node scripts/migrate.js",
+    "migrate:rollback": "node scripts/migrate-rollback.js",
+    "seed": "node seed.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
 }
