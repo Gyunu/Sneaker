@@ -13,7 +13,7 @@ if(!args[2]) {
   throw new Error("make:model -- No table name passed");
 }
 
-const template = `const Model = require("../lib/model");
+const template = `const Model = require("../sneaker/model");
 
 class ${args[0]} extends Model {
 

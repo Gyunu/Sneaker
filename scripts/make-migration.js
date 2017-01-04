@@ -9,7 +9,7 @@ if(!args[1]) {
   throw new Error("make:migration -- No database name passed");
 }
 
-const template = `const Migration = require("../lib/migration");
+const template = `const Migration = require("../sneaker/migration");
 module.exports = class ${args[0]} extends Migration {
 
   constructor(options = {

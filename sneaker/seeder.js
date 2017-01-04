@@ -1,6 +1,6 @@
-const Schema = require("./schema");
+let Schema = require('./schema');
 
-module.exports = class Seeder {
+class Seeder {
 
   constructor(options = {
     database: null
@@ -9,3 +9,5 @@ module.exports = class Seeder {
   }
 
 }
+
+module.exports = Seeder;

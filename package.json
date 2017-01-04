@@ -4,7 +4,7 @@
   "description": "A SQLite3 REST API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node_modules/.bin/mocha -path ./lib -name *.spec.js",
     "make:database": "node scripts/make-database.js",
     "make:migration": "node scripts/make-migration.js",
     "make:seeder": "node scripts/make-seeder.js",
@@ -15,6 +15,12 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "mocha": "^3.2.0",
+    "rewire": "^2.5.2",
+    "sinon": "^1.17.7"
   }
 }

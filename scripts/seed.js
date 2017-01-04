@@ -1,2 +1,2 @@
-const Seeds = require("./seeders");
+const Seeds = require("../seeders");
 Seeds.run();

@@ -1,25 +1,40 @@
-let migrations = [
-]
+let migrations = []
 
 //TODO make it so the migrations don't have to hit the database to check the table exists each iteration.
 
 function runMigrations() {
-  migrations.forEach(function(migration) {
+  migrations.forEach((migration) => {
     let mig = new migration();
+    mig.checkMigrationsTable()
+    .then((results) => {
+      // if(results.length) {
+      //   checkMigration();
+      // }
+      // else {
+      //   mig.createMigrationsTable()
+      //   .then(() => {
+      //     checkMigration();
+      //   });
+      // }
+    });
+  });
+}
 
-    if(!mig.checkMigrationsTable()) {
-      mig.createMigrationsTable();
-    }
+function runMigration(mig) {
+  mig.up();
+  mig.saveMigration();
+  console.log(`Migration ${migration.name} finished`);
+}
 
-    if(!mig.checkMigrationHasRun()) {
-      mig.up();
-      mig.saveMigration();
-      console.log(`Migration ${migration.name} finished`);
+function checkMigration(mig) {
+  mig.checkMigrationHasRun()
+  .then((results) => {
+    if(!results.length) {
+      runMigration();
     }
     else {
-      console.warn(`Migration ${migration.name} already run`);
+      console.log(`Migration ${migration.name} already run`);
     }
-
   });
 }
 

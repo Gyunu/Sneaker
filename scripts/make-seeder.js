@@ -9,7 +9,7 @@ if(!args[1]) {
   throw new Error("make:seeder -- No database name passed");
 }
 
-const template = `const Seeder = require('../lib/seeder');
+const template = `const Seeder = require('../sneaker/seeder');
 
 module.exports = class ${args[0]} extends Seeder {
 

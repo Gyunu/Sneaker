@@ -5,9 +5,9 @@ if(!args[0]) {
   throw new Error("make:database -- No database name passed");
 }
 
-const template = `const Database = require("../lib/database");
+const template = `const Database = require("../sneaker/database");
 
-module.exports = class ${args[0]} extends Database {
+module.exports = class ${args[0].charAt(0).toUpperCase() + args[0].slice(1)} extends Database {
   constructor(options = {
     name: "${args[0]}"
   })

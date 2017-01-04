@@ -1,7 +1,6 @@
 //config todo in ENV
-const http = require("http");
-
-const Article = require("../models/article.model");
+let http = require("http");
+let Databases = require('../databases');
 
 class Server {
 
@@ -12,7 +11,6 @@ class Server {
 
     let _ip = null;
     let _port = null;
-
 
     Object.defineProperty(this, 'ip', {
       enumerable: true,
@@ -33,7 +31,12 @@ class Server {
 
   }
 
+  initialise() {
+
+  }
+
   listen() {
+    console.log(Databases);
     http.createServer((request, response) => {
       response.writeHead(200, {'Content-Type': 'application/json'});
       response.end(JSON.stringify(res));
@@ -41,6 +44,6 @@ class Server {
   }
 }
 
-const server = new Server();
+let server = new Server();
 
 module.exports = server;

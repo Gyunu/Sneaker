@@ -1,17 +1,6 @@
-const LocationTypeSeeder = require("./locationTypeSeeder.seeder");
-const ArticlesSeeder = require("./articlesSeeder.seeder");
-const EducationSeeder = require("./educationSeeder.seeder");
-const LocationSeeder = require("./locationSeeder.seeder");
-const PeopleSeeder = require("./peopleSeeder.seeder");
-const WorkSeeder = require("./workSeeder.seeder");
-
+const ArticlesSeeder = require('./articles.seeder');
 let seeds = [
-  LocationTypeSeeder,
-  ArticlesSeeder,
-  EducationSeeder,
-  LocationSeeder,
-  PeopleSeeder,
-  WorkSeeder
+  ArticlesSeeder
 ]
 
 function runSeeders() {

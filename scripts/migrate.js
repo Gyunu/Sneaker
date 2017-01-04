@@ -1,2 +1,2 @@
-const Migrations = require("./migrations");
+const Migrations = require("../migrations");
 Migrations.run();

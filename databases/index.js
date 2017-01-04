@@ -1,7 +1,6 @@
-const Gyunu = require('./gyunu.database');
-
+const Test = require('./test.database');
 let databases = [
-  Gyunu
+  Test
 ];
 
 let databaseExports = {};

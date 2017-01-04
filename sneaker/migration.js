@@ -1,6 +1,6 @@
-const Schema = require('./schema');
+let Schema = require('./schema');
 
-module.exports = class Migration {
+class Migration {
 
   constructor(options = {
     database: null
@@ -27,7 +27,7 @@ module.exports = class Migration {
     let stmt = this.schema.sql.prepare("SELECT * FROM migrations WHERE migration_name=:name");
     let res = stmt.getAsObject({':name' : this.constructor.name});
     stmt.free();
-    return !!res.id;
+    return !!res.length;
   }
 
   saveMigration() {
@@ -36,10 +36,6 @@ module.exports = class Migration {
     ]);
   }
 
-  removeMigration() {
-    this.schema.delete('migrations', [
-      {"migration_name": this.constructor.name}
-    ]);
-  }
-
 }
+
+module.exports = Migration;

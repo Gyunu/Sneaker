@@ -1,7 +1,7 @@
-var SQL = require('sql.js')
-const fs = require('fs');
+let SQL = require('sql.js');
+let fs = require('fs');
 
-module.exports = class Database  {
+class Database  {
   constructor(options = {
     name: null
   }) {
@@ -9,7 +9,7 @@ module.exports = class Database  {
     if(!options.name) { throw new Error("Database: name not defined")};
 
     let _database = null;
-    let _databaseName = options.name.toLowerCase();
+    let _databaseName = options.name;
 
     Object.defineProperty(this, 'database', {
       enumerable: true,
@@ -26,14 +26,23 @@ module.exports = class Database  {
     });
 
     try {
-      let fileBuffer = fs.readFileSync('./sql/' + _databaseName + '.sqlite');
+      let fileBuffer = fs.readFileSync('./sql/' + options.name + '.sqlite');
       _database = new SQL.Database(fileBuffer);
     }
     catch (e) {
       if(e.code === 'ENOENT') {
-        console.warn('Database: Database file not found, creating in memory database that will be written to file name: ' + _databaseName + ".sqlite");
+        console.warn('Schema: Database file not found, creating in memory database that will be written to file name: ' + options.name);
         _database = new SQL.Database();
+        this.save();
       }
     }
   }
+
+  save() {
+    let data = this.database.export();
+    let buffer = new Buffer(data);
+    fs.writeFileSync('./sql/' + this.databaseName + '.sqlite', buffer);
+  }
 }
+
+module.exports = Database;
