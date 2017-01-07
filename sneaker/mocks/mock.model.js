@@ -1,12 +1,19 @@
 let Model = require('../model');
 
+let Relationship = require('./relationship.model');
+
 class Mock extends Model {
-    constructor(options = {
-      fillable: [],
-      hidden: [],
-      database: 'test'
-    }) {
-      super(options);
+    constructor(
+      fillable = [],
+      hidden = [],
+      database  = 'test',
+      query = null
+    ) {
+      super(fillable, hidden, database, query);
+    }
+
+    relationship() {
+      return this.has(Relationship, 'relationship_id', 'id');
     }
 }
 

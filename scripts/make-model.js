@@ -17,11 +17,11 @@ const template = `const Model = require("../sneaker/model");
 
 class ${args[0]} extends Model {
 
-  constructor(options = {
+  constructor(
     fillable: [],
     hidden: [],
     database: '${args[1]}'
-  }) {
+  ) {
 
     super(options);
   }

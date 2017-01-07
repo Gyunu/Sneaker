@@ -7,6 +7,22 @@ class Query {
     let _wheres = [];
     let _limit = null;
     let _offset = null;
+    let _columns = [];
+    let _database = null;
+
+    Object.defineProperty(this, 'database', {
+      enumerable: true,
+      get() {
+        return _database;
+      }
+    });
+
+    Object.defineProperty(this, 'column', {
+      enumerable: true,
+      get() {
+        return _columns;
+      }
+    });
 
     Object.defineProperty(this, 'wheres', {
       enumerable: true,
@@ -34,6 +50,7 @@ class Query {
         _offset = parseInt(value);
       }
     });
+
   }
 
   buildWhere(column = null, predicate = null, operator = null, value = null) {
@@ -71,71 +88,6 @@ class Query {
 
   static allowablePredicates() {
     return ['=', '!=', '>', '<', 'like'];
-  }
-
-  static buildWhere(table, clause, index = 0, binds = null) {
-    let query = '';
-
-    if(clause.operator) {
-      query += ` ${clause.operator}`;
-    }
-    else {
-      query += ` WHERE`;
-    }
-
-    let bind = `:${table}_${clause.column}_${index}`;
-    binds[":" + table + "_" + clause.column + "_" + index] = clause.value;
-
-    query += ` ${table}.${clause.column} ${clause.predicate} ${bind}`;
-
-    return query;
-  }
-
-  static buildWhereBetween(table, clause, index = 0, binds = null) {
-    let query = '';
-
-    if(clause.operator) {
-      query += ` ${clause.operator}`;
-    }
-    else {
-      query += ` WHERE`;
-    }
-
-    let bindStart = `:${table}_${clause.column}_start_${index}`;
-    let bindEnd = `:${table}_${clause.column}_end_${index}`;
-
-    binds[":" + table + "_" + clause.column + "_start_" + index] = clause.start;
-    binds[":" + table + "_" + clause.column + "_end_" + index] = clause.end;
-
-    query += ` ${table}.${clause.column} BETWEEN ${bindStart} AND ${bindEnd}`;
-
-    return query;
-  }
-
-  static buildSelect(table = null, columns = [], hidden = []) {
-    if(typeof columns !== "string") {
-      return columns.filter(function(column) {
-        return !hidden.includes(column);
-      })
-      .map(function(column) {
-        return `${table}.'${column}' AS "${table}.${column}"`;
-      });
-    }
-    else {
-      return columns;
-    }
-
-  }
-
-  static buildUpdate(values = null, binds = null) {
-    let query = ` SET `;
-    for(var val in values) {
-      let bind = `:${val}`;
-      binds[bind] = values[val];
-      query += ` ${val} = ${bind},`
-    }
-
-    return query.slice(0, -1);
   }
 
   create(options = {

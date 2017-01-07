@@ -1,7 +1,4 @@
-const Test = require('./test.database');
-let databases = [
-  Test
-];
+let databases = [];
 
 let databaseExports = {};
 
