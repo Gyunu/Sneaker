@@ -216,11 +216,10 @@ class Model {
     if(!this.initialWhere) { throw new Error('Model.get: no where clause')}
     return new Promise(function(resolve, reject) {
 
+      //TODO sort out columns using hidden and pick here, and just pass that built array to query.
+      //TODO set query table and database in constructor.
       self.query.select({
-        database: self.database,
-        table: self.table,
-        columns: self.attributes,
-        hidden: self.hidden,
+        columns: self.attributes
       }).then(function(results) {
         let instances = [];
         let promises = [];
