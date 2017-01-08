@@ -227,6 +227,14 @@ class Model {
     return this;
   }
 
+  generateRelationshipPromises() {
+    this.relationships.forEach((relationship) => {
+      let hasModel = this[relationship.name]();
+      let asAttributes = this.jsonOnly || this.attributesOnly;
+      this.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', result[`${this.table}.${hasModel.rootColumn}`], relationship.callback, asAttributes);
+    });
+  }
+
   get() {
     if(!this.initialWhere) { throw new Error('Model.get: no where clause')}
     return new Promise((resolve, reject) => {
@@ -242,17 +250,13 @@ class Model {
             let build = this.hydrateNewInstance(result);
 
             if(this.relationships.length) {
-              this.relationships.forEach((wit) => {
-                let hasModel = this[wit.name]();
-                let asAttributes = this.jsonOnly || this.attributesOnly;
-                this.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', result[`${this.table}.${hasModel.rootColumn}`], wit.callback, asAttributes);
-                promiseTypes.push(hasModel.model.prototype.table)
-              });
+              generateRelationshipPromises();
             }
-
+            
             instances.push(build);
         });
 
+        //TODO move this into its own testable function
         Promise.all(this.relationshipQueries).then((foreignResults) => {
             //we only need to act if there are actual results
             if(foreignResults.length) {
@@ -270,8 +274,7 @@ class Model {
                   count = 0;
                   instanceOffset++;
                 }
-
-                instances[instanceOffset].attributes[promiseTypes[count]] = foreignResults[i];
+                instances[instanceOffset].attributes[this.relationships[count].model.prototype.table] = foreignResults[i];
 
                 count++;
 
