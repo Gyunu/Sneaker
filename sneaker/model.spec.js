@@ -17,12 +17,12 @@ class QueryMock {
   select() {}
   update() {}
   create() {}
+  get() {}
 }
 
-let getColumnNamesStub = sinon.stub(QueryMock.prototype, 'getColumnNames', () => ['id']);
+let getColumnNamesStub = sinon.stub(QueryMock.prototype, 'getColumnNames', () => ['id', 'title']);
 let buildWhereStub = sinon.stub(QueryMock.prototype, 'buildWhere', () => {});
 let buildWhereBetweenStub = sinon.stub(QueryMock.prototype, 'buildWhereBetween', () => {});
-
 
 let Model = require('./model');
 
@@ -546,6 +546,14 @@ describe('Model.getAttributesAsJson', function() {
 });
 
 /*
+  pick
+*/
+
+/*
+  hide
+*/
+
+/*
   flatten
 */
 describe('Model.flatten', function() {
@@ -604,5 +612,75 @@ describe('Model.addRelationshipQuery', function() {
   it('Should push the relationship query to an array', function() {
     model.addRelationshipQuery(MockRelationship, 'test_id', '=', 1);
     chai.expect(model.relationshipQueries.length).to.equal(1);
+  });
+});
+
+/*
+  get
+*/
+describe('Model.get', function() {
+  let model;
+  let selectStub;
+  beforeEach(function() {
+    model = new Mock(undefined, undefined, undefined, QueryMock);
+  });
+  before(function() {
+    selectStub = sinon.stub(QueryMock.prototype, 'select', () => Promise.resolve(
+      [{
+        'id': 1,
+        'title': 'test'
+      }]
+    ));
+  });
+  it('Should throw an error if the model has not been instantiated by where, whereBetween or find', function() {
+    chai.expect(() => model.get()).to.throw(Error);
+  });
+  it('Should call Query.select with the correct parameters', function() {
+    Mock.find(1, undefined, QueryMock).get().then(() => {
+      sinon.assert.calledWith(selectStub, ['id', 'title']);
+    });
+  });
+  it('Should return a promise', function() {
+    chai.expect(Mock.find(1, undefined, QueryMock).get() instanceof Promise).to.equal(true);
+  });
+  it('Should return an array of Mock instances', function() {
+    Mock.find(1, undefined, QueryMock).get()
+    .then((results) => {
+      chai.expect(results.length).to.equal(1);
+      //use this because of a chai error on comparing types.
+      chai.expect(results[0] instanceof Mock).to.equal(true);
+    });
+  });
+  it('Should return a Mock instance in the array with the correct attributes', function() {
+    Mock.find(1, undefined, QueryMock).get()
+    .then((results) => {
+      chai.expect(results[0]).to.have.property('attributes');
+      chai.expect(results[0].attributes).to.have.property('id');
+      chai.expect(results[0].attributes.id).to.equal(1);
+      chai.expect(results[0].attributes).to.have.property('title');
+      chai.expect(results[0].attributes.title).to.equal('test');
+    });
+  });
+  it('Should return attributes if asAttributes is called', function() {
+    Mock.find(1, undefined, QueryMock).asAttributes().get()
+    .then((results) => {
+      chai.expect(!(results[0] instanceof Mock)).to.equal(true);
+    });
+  });
+  it('Should return the correct attributes if asAttributes is called', function() {
+    Mock.find(1, undefined, QueryMock).asAttributes().get()
+    .then((results) => {
+      chai.expect(results[0]).to.have.property('id');
+      chai.expect(results[0].id).to.equal(1);
+      chai.expect(results[0]).to.have.property('title');
+      chai.expect(results[0].title).to.equal('test');
+    });
+  });
+  it('Should call query with only pick columns if set', function() {
+    Mock.find(1, undefined, QueryMock).pick('title').get().then(() => {
+      sinon.assert.calledWith(selectStub, ['title']);
+    });
+  });
+  it('Should resolve relationships and return them in the attributes', function() {
   });
 });

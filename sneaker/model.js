@@ -19,11 +19,13 @@ class Model {
     if(!database) { throw new Error("Model: database not defined");}
 
     let _database = database;
-    let _hidden = hidden;
+    let _hiddenColumns = hidden;
     let _fillable = fillable;
     let _query = (query) ? new query() : new Query();
 
     let _wheres = [];
+    let _pickColumns = [];
+    let _columns = [];
     let _relationships = [];
     let _limitValue = null;
     let _offsetValue = null;
@@ -68,10 +70,24 @@ class Model {
       }
     });
 
-    Object.defineProperty(this, 'hidden', {
+    Object.defineProperty(this, 'hiddenColumns', {
       enumerable: true,
       get() {
-        return _hidden;
+        return _hiddenColumns;
+      }
+    });
+
+    Object.defineProperty(this, 'pickColumns', {
+      enumerable: true,
+      get() {
+        return _pickColumns;
+      }
+    });
+
+    Object.defineProperty(this, 'columns', {
+      enumerable: true,
+      get() {
+        return _columns;
       }
     });
 
@@ -114,10 +130,10 @@ class Model {
       }
     });
 
-    let columns = this.query.getColumnNames(database, this.table);
-    columns.forEach(function(column) {
+    _columns = this.query.getColumnNames(database, this.table);
+    _columns.forEach((column) => {
       this.attributes[column] = null;
-    }, this);
+    });
   }
 
   static where(column = null, predicate = null, value = undefined, database = undefined, query = undefined) {
@@ -212,27 +228,24 @@ class Model {
   }
 
   get() {
-    var self = this;
     if(!this.initialWhere) { throw new Error('Model.get: no where clause')}
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
 
-      //TODO sort out columns using hidden and pick here, and just pass that built array to query.
-      //TODO set query table and database in constructor.
-      self.query.select({
-        columns: self.attributes
-      }).then(function(results) {
+      let selectColumns = (this.pickColumns.length) ? this.pickColumns : this.columns.filter((column) => !this.hiddenColumns.includes(column));
+
+      this.query.select(selectColumns).then((results) => {
         let instances = [];
         let promises = [];
         let promiseTypes = [];
 
-        results.forEach(function(result) {
-            let build = self.hydrateNewInstance(result);
+        results.forEach((result) => {
+            let build = this.hydrateNewInstance(result);
 
-            if(self.relationships.length) {
-              self.relationships.forEach(function(wit) {
-                let hasModel = self[wit.name]();
-                let asAttributes = self.jsonOnly || self.attributesOnly;
-                self.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', result[`${self.table}.${hasModel.rootColumn}`], wit.callback, asAttributes);
+            if(this.relationships.length) {
+              this.relationships.forEach((wit) => {
+                let hasModel = this[wit.name]();
+                let asAttributes = this.jsonOnly || this.attributesOnly;
+                this.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', result[`${this.table}.${hasModel.rootColumn}`], wit.callback, asAttributes);
                 promiseTypes.push(hasModel.model.prototype.table)
               });
             }
@@ -240,12 +253,12 @@ class Model {
             instances.push(build);
         });
 
-        Promise.all(self.relationshipQueries).then(function(foreignResults) {
+        Promise.all(this.relationshipQueries).then((foreignResults) => {
             //we only need to act if there are actual results
             if(foreignResults.length) {
               let instanceOffset = 0;
               let count = 0;
-              let withLength = self.relationships.length;
+              let withLength = this.relationships.length;
 
               //a bit archaic but this is a reasonable way to get the correct promise
               //result into the instance.
@@ -265,11 +278,11 @@ class Model {
               }
             }
 
-            instances = instances.map(function(instance) {
-              if(self.attributesOnly) {
+            instances = instances.map((instance) => {
+              if(this.attributesOnly) {
                 return instance.getAttributes();
               }
-              if(self.jsonOnly) {
+              if(this.jsonOnly) {
                 return instance.getAttributesAsJson();
               }
               else {
@@ -284,25 +297,24 @@ class Model {
   }
 
   save() {
-    var self = this;
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
 
       //if it has an id we're doing an update
-      if(self.attributes.id) {
-        self.query.buildWhere('id', '=', null, self.attributes.id);
-        self.query.update({
-          database: self.database,
-          table: self.table,
-          values: self.attributes
+      if(this.attributes.id) {
+        this.query.buildWhere('id', '=', null, this.attributes.id);
+        this.query.update({
+          database: this.database,
+          table: this.table,
+          values: this.attributes
         });
         resolve();
       }
       //else we're creating a new one
       else {
-        self.query.create({
-          database: self.database,
-          table: self.table,
-          values: self.attributes
+        this.query.create({
+          database: this.database,
+          table: this.table,
+          values: this.attributes
         });
         resolve();
       }
@@ -329,12 +341,14 @@ class Model {
   }
 
   hide(column) {
-    //STUB
+    if(!this.columns.includes(column)) { throw new Error('Model.hide: Column does not exist on model')}
+    this.hiddenColumns.push(column);
     return this;
   }
 
   pick(column) {
-    //STUB
+    if(!this.columns.includes(column)) { throw new Error('Model.pick: Column does not exist on model')}
+    this.pickColumns.push(column);
     return this;
   }
 
@@ -376,7 +390,6 @@ class Model {
   //EXECUTION
   hydrateNewInstance(result = {}) {
     let instance = new this.constructor(this.fillable, this.hidden, this.database, this.query.constructor);
-
     instance.hydrate(result);
     return instance;
   }
@@ -394,7 +407,7 @@ class Model {
     for(var att in this.attributes) {
       if(this.attributes[att] instanceof Array) {
         ret[att] = [];
-        this.attributes[att].forEach(function(sub) {
+        this.attributes[att].forEach((sub) => {
              ret[att].push(sub.flatten());
         });
       }
