@@ -20,6 +20,17 @@ class Query {
     let _inserts = [];
     let _deletes = [];
     let _type = null;
+    let _table = null;
+
+    Object.defineProperty(this, 'table', {
+      enumerable: true,
+      get() {
+        return _table;
+      },
+      set(value) {
+        _table = value;
+      }
+    });
 
     Object.defineProperty(this, 'type', {
       enumerable: false,
@@ -130,6 +141,7 @@ class Query {
     return {
       from: (table) => {
         let columns = [];
+        this.table = table;
 
         if(column.constructor === String) {
           if(!this.selects.columns.includes(column)) {
@@ -143,14 +155,13 @@ class Query {
         }
 
         columns = this.selects.columns.concat(columns);
-
         let selectClause = {
           columns: columns,
           table: table
         }
 
         this.selects = selectClause;
-
+        return this;
       }
     }
   }
@@ -282,19 +293,75 @@ class Query {
   }
 
   buildSelectSQL() {
-    let query = '';
+    let query = `SELECT `;
 
+    query += this.selects.columns.reduce((acc, column) => {
+      return acc + `${this.selects.table}.'${column}', `;
+    }, '');
 
+    //remove trailing comma and space.
+    query = query.slice(0, -2);
+    query += ` FROM ${this.selects.table}`;
 
     return query;
   }
 
+  buildWhereSQL() {
+    let query = '';
+    let binds = {};
+
+    query += this.wheres.reduce((acc, where, index) => {
+      let statement = ``;
+      if(where.conditional) {
+        switch(where.conditional) {
+          case 'AND': {
+            statement += `AND `
+            break;
+          }
+          case 'OR': {
+            statement += `OR `
+            break;
+          }
+        }
+      }
+      else {
+        statement += `WHERE `
+      }
+
+      statement += `${this.table}.'${where.column}' `;
+
+      if(where.predicate == 'between') {
+        let bindStart = `:${this.table}_${where.column}_start_${index}`;
+        let bindEnd = `:${this.table}_${where.column}_end_${index}`;
+
+        binds[":" + this.table + "_" + where.column + "_start_" + index] = where.start;
+        binds[":" + this.table + "_" + where.column + "_end_" + index] = where.end;
+        statement += `BETWEEN ${bindStart} AND ${bindEnd} `;
+      }
+      else {
+        let bind = `:${this.table}_${where.column}_${index}`;
+        binds[":" + this.table + "_" + where.column + "_" + index] = where.value;
+        statement += `${where.predicate} ${bind} `;
+      }
+      return acc + statement;
+    }, '');
+
+    //remove trailing space.
+    query = query.slice(0, -1);
+    return {
+      sql: query,
+      binds: binds
+    };
+  }
+
   buildSQL() {
     let query = '';
+    let binds = null;
+    let wheres = null;
 
     switch(this.type) {
       case QueryType.SELECT: {
-        query = buildSelectSQL();
+        query += this.buildSelectSQL();
         break;
       }
       case QueryType.INSERT: {
@@ -308,7 +375,15 @@ class Query {
       }
     }
 
-    return query;
+    wheres = this.buildWhereSQL();
+
+    binds = wheres.binds;
+    query += ' ' + wheres.sql;
+
+    return {
+      sql: query,
+      binds: binds
+    };
   }
 }
 
