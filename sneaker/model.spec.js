@@ -548,10 +548,54 @@ describe('Model.getAttributesAsJson', function() {
 /*
   pick
 */
+describe('Model.pick', function() {
+  let model;
+  beforeEach(function() {
+    model = new Mock(undefined, undefined, undefined, QueryMock);
+  });
+  it('Should throw an error if the argument is not a string', function() {
+    chai.expect(() => { model.pick() }).to.throw(Error);
+    chai.expect(() => { model.pick(1)}).to.throw(Error);
+  });
+  it('Should throw an error if the argument does not exist in the columns', function() {
+    chai.expect(() => { model.pick('error')}).to.throw(Error);
+  });
+  it('Should push the column to the pick columns array', function() {
+    model.pick('title');
+    chai.expect(model.pickColumns.length).to.equal(1);
+  });
+  it('Should return itself', function() {
+    let m = model.pick('title');
+    chai.expect(m).to.equal(model);
+  });
+});
+
 
 /*
   hide
 */
+describe('Model.hide', function() {
+  let model;
+  beforeEach(function() {
+    model = new Mock(undefined, undefined, undefined, QueryMock);
+  });
+  it('Should throw an error if the argument is not a string', function() {
+    chai.expect(() => { model.hide() }).to.throw(Error);
+    chai.expect(() => { model.hide(1)}).to.throw(Error);
+  });
+  it('Should throw an error if the argument does not exist in the columns', function() {
+    chai.expect(() => { model.hide('error')}).to.throw(Error);
+  });
+  it('Should push the column to the hidden columns array', function() {
+    model.hide('title');
+    chai.expect(model.hiddenColumns.length).to.equal(1);
+  });
+  it('Should return itself', function() {
+    let m = model.hide('title');
+    chai.expect(m).to.equal(model);
+  });
+});
+
 
 /*
   flatten

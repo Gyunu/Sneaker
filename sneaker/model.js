@@ -252,7 +252,7 @@ class Model {
             if(this.relationships.length) {
               generateRelationshipPromises();
             }
-            
+
             instances.push(build);
         });
 
@@ -274,7 +274,7 @@ class Model {
                   count = 0;
                   instanceOffset++;
                 }
-                instances[instanceOffset].attributes[this.relationships[count].model.prototype.table] = foreignResults[i];
+                instances[instanceOffset].attributes[this.relationships[count].model.constructor.name] = foreignResults[i];
 
                 count++;
 
@@ -344,12 +344,14 @@ class Model {
   }
 
   hide(column) {
+    if(typeof column !== 'string') { throw new Error('Model.hide: Column name is not a string')}
     if(!this.columns.includes(column)) { throw new Error('Model.hide: Column does not exist on model')}
     this.hiddenColumns.push(column);
     return this;
   }
 
   pick(column) {
+    if(typeof column !== 'string') { throw new Error('Model.pick: Column name is not a string')}
     if(!this.columns.includes(column)) { throw new Error('Model.pick: Column does not exist on model')}
     this.pickColumns.push(column);
     return this;
