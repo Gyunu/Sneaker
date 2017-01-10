@@ -21,7 +21,7 @@ class Model {
     let _database = database;
     let _hiddenColumns = hidden;
     let _fillable = fillable;
-    let _query = (query) ? new query() : new Query();
+    let _query = (query) ? query : new Query(database, this.table);
 
     let _wheres = [];
     let _pickColumns = [];
@@ -144,7 +144,7 @@ class Model {
 
 
     let instance = new this(undefined, undefined, database, query);
-    instance.query.buildWhere(column, predicate, null, value);
+    instance.query.addWhere(column, predicate, value);
     instance.initialWhere = true;
 
     return instance;
@@ -168,7 +168,7 @@ class Model {
     if(typeof id !== 'number') { throw new Error('Model.find: id is not a number')}
 
     let instance = new this(undefined, undefined, database, query);
-    instance.query.buildWhere('id', '=', null, id);
+    instance.query.addWhere('id', '=', id);
     instance.initialWhere = true;
 
     return instance;
@@ -221,17 +221,18 @@ class Model {
 
     this.relationships.push({
       name: name,
-      callback: callback
+      callback: callback,
+      model: this[name]
     });
 
     return this;
   }
 
-  generateRelationshipPromises() {
+  generateRelationshipPromises(rootResult) {
     this.relationships.forEach((relationship) => {
       let hasModel = this[relationship.name]();
       let asAttributes = this.jsonOnly || this.attributesOnly;
-      this.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', result[`${this.table}.${hasModel.rootColumn}`], relationship.callback, asAttributes);
+      this.addRelationshipQuery(hasModel.model, hasModel.onColumn, '=', rootResult[`${this.table}.${hasModel.rootColumn}`], relationship.callback, asAttributes);
     });
   }
 
@@ -240,7 +241,6 @@ class Model {
     return new Promise((resolve, reject) => {
 
       let selectColumns = (this.pickColumns.length) ? this.pickColumns : this.columns.filter((column) => !this.hiddenColumns.includes(column));
-
       this.query.select(selectColumns).then((results) => {
         let instances = [];
         let promises = [];
@@ -248,33 +248,24 @@ class Model {
 
         results.forEach((result) => {
             let build = this.hydrateNewInstance(result);
-
             if(this.relationships.length) {
-              generateRelationshipPromises();
+              this.generateRelationshipPromises(result);
             }
-
             instances.push(build);
         });
 
-        //TODO move this into its own testable function
         Promise.all(this.relationshipQueries).then((foreignResults) => {
-            //we only need to act if there are actual results
             if(foreignResults.length) {
               let instanceOffset = 0;
               let count = 0;
               let withLength = this.relationships.length;
 
-              //a bit archaic but this is a reasonable way to get the correct promise
-              //result into the instance.
-              //We can't resolve the instance until we build up all the related things requested,
-              //and we have to use promise.all with all instances promises in to prevent a race condition between
-              //resolving a qualified instance and resolving related models.
               for(let i = 0; i < foreignResults.length; i++) {
                 if(count == withLength) {
                   count = 0;
                   instanceOffset++;
                 }
-                instances[instanceOffset].attributes[this.relationships[count].model.constructor.name] = foreignResults[i];
+                instances[instanceOffset].attributes[this.relationships[count].model.name] = foreignResults[i];
 
                 count++;
 

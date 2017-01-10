@@ -12,6 +12,7 @@ class QueryMock {
   }
   getColumnNames() {}
   buildWhere() {}
+  addWhere() {}
   buildWhereBetween() {}
   where() {}
   select() {}
@@ -21,7 +22,7 @@ class QueryMock {
 }
 
 let getColumnNamesStub = sinon.stub(QueryMock.prototype, 'getColumnNames', () => ['id', 'title']);
-let buildWhereStub = sinon.stub(QueryMock.prototype, 'buildWhere', () => {});
+let addWhereStub = sinon.stub(QueryMock.prototype, 'addWhere', () => {});
 let buildWhereBetweenStub = sinon.stub(QueryMock.prototype, 'buildWhereBetween', () => {});
 
 let Model = require('./model');
@@ -56,6 +57,10 @@ describe('Model.constructor', function() {
   Where
 */
 describe('Model.where', function() {
+  let queryMock;
+  beforeEach(function() {
+    queryMock = new QueryMock();
+  });
   it('Should be a static function', function() {
     chai.expect(Mock.where).to.be.a('function');
   });
@@ -69,11 +74,11 @@ describe('Model.where', function() {
     chai.expect(() => { Mock.where('id', '=')}).to.throw(Error);
   });
   it('Should have called Query with correct parameters', function() {
-    let model = Mock.where('id', '=', 1, undefined, QueryMock);
-    sinon.assert.calledWith(buildWhereStub, 'id', '=', null, 1);
+    let model = Mock.where('id', '=', 1, undefined, new QueryMock());
+    sinon.assert.calledWith(addWhereStub, 'id', '=', 1);
   });
   it('Should return an instance of itself', function() {
-    let model = Mock.where('id', '=', 1, undefined, QueryMock);
+    let model = Mock.where('id', '=', 1, undefined, queryMock);
     chai.expect(model).to.be.an.instanceof(Mock);
   });
 });
@@ -82,24 +87,28 @@ describe('Model.where', function() {
   WhereBetween
 */
 describe('Model.whereBetween', function() {
+  let queryMock;
+  beforeEach(function() {
+    queryMock = new QueryMock();
+  });
   it('Should be a static function', function() {
     chai.expect(Mock.whereBetween).to.be.a('function');
   });
   it('Should throw an error if no column name is passed', function() {
-    chai.expect(() => { Mock.whereBetween(undefined, undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { Mock.whereBetween(undefined, undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no start value is passed', function() {
-    chai.expect(() => { Mock.whereBetween('id', undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { Mock.whereBetween('id', undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no end value is passed', function() {
-    chai.expect(() => { Mock.whereBetween('id', 1, undefined, undefined, QueryMock)}).to.throw(Error);
+    chai.expect(() => { Mock.whereBetween('id', 1, undefined, undefined, queryMock)}).to.throw(Error);
   });
   it('Should have called Query with correct parameters', function() {
-    let model = Mock.whereBetween('id', 1, 100, undefined, QueryMock);
+    let model = Mock.whereBetween('id', 1, 100, undefined, queryMock);
     sinon.assert.calledWith(buildWhereBetweenStub, 'id', 1, 100, null);
   });
   it('Should return an instance of itself', function() {
-    let model = Mock.whereBetween('id', 1, 100, undefined, QueryMock);
+    let model = Mock.whereBetween('id', 1, 100, undefined, queryMock);
     chai.expect(model).to.be.an.instanceof(Mock);
   });
 });
@@ -108,21 +117,25 @@ describe('Model.whereBetween', function() {
   Find
 */
 describe('Model.find', function() {
+  let queryMock;
+  beforeEach(function() {
+    queryMock = new QueryMock();
+  });
   it('Should be a static function', function() {
     chai.expect(Mock.find).to.be.a('function');
   });
   it('Should throw an error if no id is passed', function() {
-    chai.expect(() => { Mock.find(undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { Mock.find(undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if id is not a number', function() {
-    chai.expect(() => { Mock.find('1', undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { Mock.find('1', undefined, queryMock) }).to.throw(Error);
   });
   it('Should have called Query with correct parameters', function() {
-    let model = Mock.find(1, undefined, QueryMock);
-    sinon.assert.calledWith(buildWhereStub, 'id', '=', null, 1);
+    let model = Mock.find(1, undefined, queryMock);
+    sinon.assert.calledWith(addWhereStub, 'id', '=', 1);
   });
   it('Should return an instance of itself', function() {
-    let model = Mock.find(1, undefined, QueryMock);
+    let model = Mock.find(1, undefined, queryMock);
     chai.expect(model).to.be.an.instanceof(Mock);
   });
 });
@@ -155,7 +168,7 @@ describe('Model.andWhere', function() {
   });
   it('Should call Query with the correct parameters', function() {
     model.andWhere('id', '=', 1);
-    sinon.assert.calledWith(buildWhereStub, 'id', '=', 'AND', 1);
+    sinon.assert.calledWith(addWhereStub, 'id', '=', 1);
   });
   it('Should return itself', function() {
     let m = model.andWhere('id', '=', 1);
@@ -169,7 +182,8 @@ describe('Model.andWhere', function() {
 describe('Model.orWhere', function() {
   let model;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    let queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if not instantiated', function() {
     chai.expect(() => Mock.orWhere()).to.throw(Error);
@@ -185,7 +199,7 @@ describe('Model.orWhere', function() {
   });
   it('Should call Query with the correct parameters', function() {
     model.orWhere('id', '=', 1);
-    sinon.assert.calledWith(buildWhereStub, 'id', '=', 'OR', 1);
+    sinon.assert.calledWith(addWhereStub, 'id', '=', 1);
   });
   it('Should return itself', function() {
     let m = model.orWhere('id', '=', 1);
@@ -198,27 +212,29 @@ describe('Model.orWhere', function() {
 */
 describe('Model.andWhereBetween', function() {
   let model;
+  let queryMock
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if not instantiated', function() {
     chai.expect(() => Mock.andWhereBetween()).to.throw(Error);
   });
   it('Should throw an error if no column name is passed', function() {
-    chai.expect(() => { model.andWhereBetween(undefined, undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { model.andWhereBetween(undefined, undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no start value is passed', function() {
-    chai.expect(() => { model.andWhereBetween('id', undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { model.andWhereBetween('id', undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no end value is passed', function() {
-    chai.expect(() => { model.andWhereBetween('id', 1, undefined, undefined, QueryMock)}).to.throw(Error);
+    chai.expect(() => { model.andWhereBetween('id', 1, undefined, undefined, queryMock)}).to.throw(Error);
   });
   it('Should have called Query with correct parameters', function() {
-    model.andWhereBetween('id', 1, 100, undefined, QueryMock);
+    model.andWhereBetween('id', 1, 100, undefined, queryMock);
     sinon.assert.calledWith(buildWhereBetweenStub, 'id', 1, 100, 'AND');
   });
   it('Should return an instance of itself', function() {
-    let m = model.andWhereBetween('id', 1, 100, undefined, QueryMock);
+    let m = model.andWhereBetween('id', 1, 100, undefined, queryMock);
     chai.expect(m).to.equal(model);
   });
 });
@@ -228,27 +244,29 @@ describe('Model.andWhereBetween', function() {
 */
 describe('Model.orWhereBetween', function() {
   let model;
+  let queryMock
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if not instantiated', function() {
     chai.expect(() => Mock.orWhereBetween()).to.throw(Error);
   });
   it('Should throw an error if no column name is passed', function() {
-    chai.expect(() => { model.orWhereBetween(undefined, undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { model.orWhereBetween(undefined, undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no start value is passed', function() {
-    chai.expect(() => { model.orWhereBetween('id', undefined, undefined, undefined, QueryMock) }).to.throw(Error);
+    chai.expect(() => { model.orWhereBetween('id', undefined, undefined, undefined, queryMock) }).to.throw(Error);
   });
   it('Should throw an error if no end value is passed', function() {
-    chai.expect(() => { model.orWhereBetween('id', 1, undefined, undefined, QueryMock)}).to.throw(Error);
+    chai.expect(() => { model.orWhereBetween('id', 1, undefined, undefined, queryMock)}).to.throw(Error);
   });
   it('Should have called Query with correct parameters', function() {
-    model.orWhereBetween('id', 1, 100, undefined, QueryMock);
+    model.orWhereBetween('id', 1, 100, undefined, queryMock);
     sinon.assert.calledWith(buildWhereBetweenStub, 'id', 1, 100, 'OR');
   });
   it('Should return an instance of itself', function() {
-    let m = model.orWhereBetween('id', 1, 100, undefined, QueryMock);
+    let m = model.orWhereBetween('id', 1, 100, undefined, queryMock);
     chai.expect(m).to.equal(model);
   });
 });
@@ -259,8 +277,10 @@ describe('Model.orWhereBetween', function() {
 */
 describe('Model.has', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if the model is not passed', function() {
     chai.expect(() => model.has(undefined, undefined, undefined)).to.throw(Error);
@@ -295,8 +315,10 @@ describe('Model.has', function() {
 */
 describe('Model.with', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if relationship name is not passed', function() {
     chai.expect(() => model.with(undefined, undefined)).to.throw(Error);
@@ -333,8 +355,10 @@ describe('Model.with', function() {
 */
 describe('Model.limit', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if limit is not passed', function() {
     chai.expect(() => model.limit(undefined)).to.throw(Error);
@@ -357,8 +381,10 @@ describe('Model.limit', function() {
 */
 describe('Model.offset', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if offset is not passed', function() {
     chai.expect(() => model.offset(undefined)).to.throw(Error);
@@ -381,8 +407,9 @@ describe('Model.offset', function() {
 */
 describe('Model.asJson', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should set jsonOnly to true', function() {
     model.asJson();
@@ -403,8 +430,10 @@ describe('Model.asJson', function() {
 */
 describe('Model.asAttributes', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should set asAttributes to true', function() {
     model.asAttributes();
@@ -425,8 +454,10 @@ describe('Model.asAttributes', function() {
 */
 describe('Model.updateAttribute', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if name is not passed', function() {
     chai.expect(() => model.updateAttribute(undefined, undefined)).to.throw(Error);
@@ -449,8 +480,10 @@ describe('Model.updateAttribute', function() {
 */
 describe('Model.hydrate', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if argument is not an object', function() {
     chai.expect(() => model.hydrate(1)).to.throw(Error);
@@ -477,8 +510,10 @@ describe('Model.hydrate', function() {
 */
 describe('Model.hydrateNewInstance', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if argument is not an object', function() {
     chai.expect(() => model.hydrateNewInstance(1)).to.throw(Error);
@@ -505,8 +540,10 @@ describe('Model.hydrateNewInstance', function() {
 */
 describe('Model.getAttributes', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should return the models attributes', function() {
     let attributes = model.getAttributes();
@@ -525,8 +562,10 @@ describe('Model.getAttributes', function() {
 */
 describe('Model.getAttributesAsJson', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should return a string, which is JSON', function() {
     let attributes = model.getAttributesAsJson();
@@ -550,8 +589,11 @@ describe('Model.getAttributesAsJson', function() {
 */
 describe('Model.pick', function() {
   let model;
+  let queryMock;
+
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if the argument is not a string', function() {
     chai.expect(() => { model.pick() }).to.throw(Error);
@@ -576,8 +618,10 @@ describe('Model.pick', function() {
 */
 describe('Model.hide', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if the argument is not a string', function() {
     chai.expect(() => { model.hide() }).to.throw(Error);
@@ -602,8 +646,10 @@ describe('Model.hide', function() {
 */
 describe('Model.flatten', function() {
   let model;
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should return an object of attributes', function() {
     let attributes = model.flatten();
@@ -626,8 +672,10 @@ describe('Model.addRelationshipQuery', function() {
   let modelGetStype = sinon.stub(MockRelationship.prototype, 'get', () => { return new Promise(() => {}, () => {})});
   let modelAsAttributesStub = sinon.stub(MockRelationship.prototype, 'asAttributes', () => {});
   let callbackStub = sinon.stub();
+  let queryMock;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   it('Should throw an error if model is not passed', function() {
     chai.expect(() => model.addRelationshipQuery(undefined, undefined, undefined, undefined, undefined, undefined)).to.throw(Error);
@@ -664,9 +712,11 @@ describe('Model.addRelationshipQuery', function() {
 */
 describe('Model.get', function() {
   let model;
+  let queryMock;
   let selectStub;
   beforeEach(function() {
-    model = new Mock(undefined, undefined, undefined, QueryMock);
+    queryMock = new QueryMock();
+    model = new Mock(undefined, undefined, undefined, queryMock);
   });
   before(function() {
     selectStub = sinon.stub(QueryMock.prototype, 'select', () => Promise.resolve(
@@ -680,15 +730,15 @@ describe('Model.get', function() {
     chai.expect(() => model.get()).to.throw(Error);
   });
   it('Should call Query.select with the correct parameters', function() {
-    Mock.find(1, undefined, QueryMock).get().then(() => {
+    Mock.find(1, undefined, queryMock).get().then(() => {
       sinon.assert.calledWith(selectStub, ['id', 'title']);
     });
   });
   it('Should return a promise', function() {
-    chai.expect(Mock.find(1, undefined, QueryMock).get() instanceof Promise).to.equal(true);
+    chai.expect(Mock.find(1, undefined, queryMock).get() instanceof Promise).to.equal(true);
   });
   it('Should return an array of Mock instances', function() {
-    Mock.find(1, undefined, QueryMock).get()
+    Mock.find(1, undefined, queryMock).get()
     .then((results) => {
       chai.expect(results.length).to.equal(1);
       //use this because of a chai error on comparing types.
@@ -696,7 +746,7 @@ describe('Model.get', function() {
     });
   });
   it('Should return a Mock instance in the array with the correct attributes', function() {
-    Mock.find(1, undefined, QueryMock).get()
+    Mock.find(1, undefined, queryMock).get()
     .then((results) => {
       chai.expect(results[0]).to.have.property('attributes');
       chai.expect(results[0].attributes).to.have.property('id');
@@ -706,13 +756,13 @@ describe('Model.get', function() {
     });
   });
   it('Should return attributes if asAttributes is called', function() {
-    Mock.find(1, undefined, QueryMock).asAttributes().get()
+    Mock.find(1, undefined, queryMock).asAttributes().get()
     .then((results) => {
       chai.expect(!(results[0] instanceof Mock)).to.equal(true);
     });
   });
   it('Should return the correct attributes if asAttributes is called', function() {
-    Mock.find(1, undefined, QueryMock).asAttributes().get()
+    Mock.find(1, undefined, queryMock).asAttributes().get()
     .then((results) => {
       chai.expect(results[0]).to.have.property('id');
       chai.expect(results[0].id).to.equal(1);
@@ -721,7 +771,7 @@ describe('Model.get', function() {
     });
   });
   it('Should call query with only pick columns if set', function() {
-    Mock.find(1, undefined, QueryMock).pick('title').get().then(() => {
+    Mock.find(1, undefined, queryMock).pick('title').get().then(() => {
       sinon.assert.calledWith(selectStub, ['title']);
     });
   });

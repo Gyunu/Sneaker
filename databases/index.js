@@ -1,4 +1,7 @@
-let databases = [];
+var test =  require('./test.database');
+let databases = [
+  test
+];
 
 let databaseExports = {};
 

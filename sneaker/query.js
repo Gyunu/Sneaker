@@ -1,283 +1,314 @@
 let Databases = require('../databases');
-let fs = require('fs');
+
+const QueryType = {
+  SELECT: 1,
+  UPDATE: 2,
+  DELETE: 3,
+  INSERT: 4
+}
 
 class Query {
-  constructor(database = undefined, table = undefined) {
+  constructor() {
 
+    let _selects = {
+      columns: [],
+      table: null
+    };
     let _wheres = [];
-    let _limit = null;
-    let _offset = null;
-    let _columns = [];
-    let _database = database;
-    let _table = table;
+    let _joins = [];
+    let _updates = [];
+    let _inserts = [];
+    let _deletes = [];
+    let _type = null;
 
-    Object.defineProperty(this, 'database', {
-      enumerable: true,
+    Object.defineProperty(this, 'type', {
+      enumerable: false,
       get() {
-        return _database;
+        return _type;
+      },
+      set(value) {
+        _type = value;
       }
     });
 
-    Object.defineProperty(this, 'allowablePredicates', {
-      enumerable: true,
+    Object.defineProperty(this, 'selects', {
+      enumerable: false,
       get() {
-        return ['=', '!=', '>', '<', 'like'];
-      }
-    })
-
-    Object.defineProperty(this, 'table', {
-      enumerable: true,
-      get() {
-        return _table;
-      }
-    });
-
-    Object.defineProperty(this, 'column', {
-      enumerable: true,
-      get() {
-        return _columns;
+        return _selects;
+      },
+      set(value) {
+        _selects = value;
       }
     });
 
     Object.defineProperty(this, 'wheres', {
-      enumerable: true,
+      enumerable: false,
       get() {
         return _wheres;
-      }
-    });
-
-    Object.defineProperty(this, 'limit', {
-      enumerable: false,
-      get() {
-        return _limit;
       },
       set(value) {
-        _limit = parseInt(value);
+        _wheres = value;
       }
     });
 
-    Object.defineProperty(this, 'offset', {
+    Object.defineProperty(this, 'joins', {
       enumerable: false,
       get() {
-        return _offset;
+        return _joins;
       },
       set(value) {
-        _offset = parseInt(value);
+        _wheres = value;
       }
     });
 
+    Object.defineProperty(this, 'updates', {
+      enumerable: false,
+      get() {
+        return _updates;
+      },
+      set(value) {
+        _updates = value;
+      }
+    });
+
+    Object.defineProperty(this, 'inserts', {
+      enumerable: false,
+      get() {
+        return _inserts;
+      },
+      set(value) {
+        _inserts = value;
+      }
+    });
+
+    Object.defineProperty(this, 'deletes', {
+      enumerable: false,
+      get() {
+        return _deletes;
+      },
+      set(value) {
+        _deletes = value;
+      }
+    });
   }
 
-  database(name) {
-    if(typeof name !== 'string') { throw new Error('Query.database: name is not a string')}
-    this.database = name;
+  insert(insertObject) {
+    if(this.type && this.type !== QueryType.INSERT) { throw new Error('Query.insert: Query is of type ', this.type)}
+    this.type = QueryType.INSERT;
+
+    if(insertObject.constructor === Object) {
+      this.inserts.push(insertObject);
+    }
     return this;
   }
 
-  table(name) {
-    if(typeof name !== 'string') { throw new Error('Query.table: name is not a string')}
-    this.table = name;
-    return this;
+  delete() {
+    if(this.type && this.type !== QueryType.DELETE) { throw new Error('Query.delete: Query is of type ', this.type)}
+    this.type = QueryType.DELETE;
+    return {
+      where: (column) => {
+        if(column.constructor === String) {
+          return {
+            equals: (value) => { this.deletes.push(this.buildDeleteClause(column, '=', value)); return this;},
+            notEquals: (value) => { this.deletes.push(this.buildDeleteClause(column, '!=', value)); return this; },
+            greaterThan: (value) => { this.deletes.push(this.buildDeleteClause(column, '>', value)); return this; },
+            lessThan: (value) => { this.deletes.push(this.buildDeleteClause(column, '<', value)); return this; },
+            like: (value) => { this.deletes.push(this.buildDeleteClause(column, 'like', '%'+value+'%')); return this;}
+          }
+        }
+        else {
+          throw new Error('Query.delete.where: column is not a string');
+        }
+      }
+    }
   }
 
-  static checkPredicateIsValid(predicate) {
-    return Query.allowablePredicates.includes(predicate);
+  select(column = undefined) {
+    if(this.type && this.type !== QueryType.SELECT) { throw new Error('Query.select: Query is of type ', this.type)}
+    this.type = QueryType.SELECT;
+
+    return {
+      from: (table) => {
+        let columns = [];
+
+        if(column.constructor === String) {
+          if(!this.selects.columns.includes(column)) {
+            columns = [column];
+          }
+        }
+        if(column.constructor === Array) {
+          columns = column.filter((col) => {
+            if(!this.selects.columns.includes(col) && col.constructor === String) { return col; }
+          });
+        }
+
+        columns = this.selects.columns.concat(columns);
+
+        let selectClause = {
+          columns: columns,
+          table: table
+        }
+
+        this.selects = selectClause;
+
+      }
+    }
   }
 
-  static buildWhere(table, clause, index = 0, binds = null) {
-    if(!Query.checkPredicateIsValid(clause.predicate)) { throw new Error('Query.buildWhere: Predicate is not a valid predicate')}
+  update(column = undefined) {
+    if(this.type && this.type !== QueryType.UPDATE) { throw new Error('Query.update: Query is of type ', this.type)}
+    this.type = QueryType.UPDATE;
+    if(column.constructor === String) {
+      return {
+        with: (value) => { this.updates.push(this.buildUpdateClause(column, value)); return this; }
+      }
+    }
+    if(column.constructor === Array) {
+      return {
+        with: (values) => {
+          if(values.constructor === Array) {
+            if(values.length !== column.length) { throw new Error('Query.update.with: Columns do not match values count');}
+            column.forEach((col, index) => {
+              this.updates.push(this.buildUpdateClause(col, values[index]));
+            });
+            return this;
+          }
+          else {
+            throw new Error('Query.update.with: array of values not passed');
+          }
+        }
+      }
+    }
+
+    throw new Error('Query.update: argument is not a string or an array');
+  }
+
+  where(column = undefined, conditional = undefined) {
+    if(column.constructor === String) {
+      return {
+        equals: (value) => { this.wheres.push(this.buildWhereClause(column, '=', value, conditional)); return this;},
+        notEquals: (value) => { this.wheres.push(this.buildWhereClause(column, '!=', value, conditional)); return this; },
+        greaterThan: (value) => { this.wheres.push(this.buildWhereClause(column, '>', value, conditional)); return this; },
+        lessThan: (value) => { this.wheres.push(this.buildWhereClause(column, '<', value, conditional)); return this; },
+        like: (value) => { this.wheres.push(this.buildWhereClause(column, 'like', '%'+value+'%', conditional)); return this;},
+        between: (start) => { return {
+          and: (end) => { this.wheres.push(this.buildWhereBetweenClause(column, start, end, conditional)); return this;}
+        }}
+      }
+    }
+    else {
+      throw new Error('Query.where: column is not a string');
+    }
+  }
+
+  andWhere(column = undefined) {
+    return this.where(column, 'AND');
+  }
+
+  orWhere(column = undefined) {
+    return this.where(column, 'OR');
+  }
+
+
+  join(table = undefined, type = 'INNER') {
+    if(table.constructor === String) {
+      return {
+        on: (column) => {
+          if(column.constructor === String) {
+            return {
+              equals: (value) => { this.joins.push(this.buildJoinClause(type, table, column, '=', value)); return this;},
+            }
+          }
+          else {
+            throw new Error('Query.join.on: column is not a string');
+          }
+        }
+      }
+    }
+    else {
+      throw new Error('Query.join: table name is not a string');
+    }
+  }
+
+  buildJoinClause(type = 'INNER', table = undefined, joinColumn = undefined, predicate = undefined, value = undefined) {
+    return {
+      type: type,
+      table: table,
+      joinColumn: joinColumn,
+      predicate: predicate,
+      value: value
+    }
+  }
+
+  buildWhereClause(column = undefined, predicate = undefined, value = undefined, conditional = undefined) {
+    return {
+      column: column,
+      predicate: predicate,
+      value: value,
+      conditional: conditional
+    }
+  }
+
+  buildWhereBetweenClause(column = undefined, start = undefined, end = undefined, conditional = undefined) {
+    return {
+      column: column,
+      predicate: 'between',
+      start: start,
+      end: end,
+      conditional: conditional
+    }
+  }
+
+  buildUpdateClause(column, value) {
+    return {
+      column: column,
+      value: value
+    }
+  }
+
+  buildUpdateClause(column, value) {
+    return {
+      column: column,
+      value: value
+    }
+  }
+
+  buildDeleteClause(column = undefined, predicate = undefined, value = undefined) {
+    return {
+      column: column,
+      predicate: predicate,
+      value: value
+    }
+  }
+
+  buildSelectSQL() {
     let query = '';
 
-    if(clause.operator) {
-      query += ` ${clause.operator}`;
-    }
-    else {
-      query += ` WHERE`;
-    }
 
-    let bind = `:${table}_${clause.column}_${index}`;
-    binds[":" + table + "_" + clause.column + "_" + index] = clause.value;
-
-    query += ` ${table}.${clause.column} ${clause.predicate} ${bind}`;
 
     return query;
   }
 
-  static buildWhereBetween(table, clause, index = 0, binds = null) {
+  buildSQL() {
     let query = '';
 
-    if(clause.operator) {
-      query += ` ${clause.operator}`;
-    }
-    else {
-      query += ` WHERE`;
-    }
-
-    let bindStart = `:${table}_${clause.column}_start_${index}`;
-    let bindEnd = `:${table}_${clause.column}_end_${index}`;
-
-    binds[":" + table + "_" + clause.column + "_start_" + index] = clause.start;
-    binds[":" + table + "_" + clause.column + "_end_" + index] = clause.end;
-
-    query += ` ${table}.${clause.column} BETWEEN ${bindStart} AND ${bindEnd}`;
-
-    return query;
-  }
-
-  static buildSelect(columns = []) {
-    if(typeof columns === "Array") {
-      return columns.map(function(column) {
-        return `${table}.'${column}' AS "${table}.${column}"`;
-      });
-    }
-    else {
-      return `* AS "${table}.*"` ;
-    }
-
-  }
-
-  static buildUpdate(values = null, binds = null) {
-    let query = ` SET `;
-    for(var val in values) {
-      let bind = `:${val}`;
-      binds[bind] = values[val];
-      query += ` ${val} = ${bind},`
-    }
-
-    return query.slice(0, -1);
-  }
-
-  create(options = {
-    database: null,
-    table: null,
-    values: null
-  }) {
-    return new Promise((resolve, reject) => {
-      //STUB
-      resolve();
-    });
-  }
-
-  update(options = {
-    values: null
-  }) {
-    let self = this;
-    return new Promise((resolve, reject) => {
-      if(!self.table) { throw new Error('Query.update: no table name')};
-
-      let query = `UPDATE`;
-      let binds = {};
-
-      query += ` ${self.table}`;
-      query += ` ${Query.buildUpdate(options.values, binds)}`;
-
-
-      self.wheres.forEach(function(clause, index) {
-        switch(clause.type) {
-          case "WHERE": {
-            query += Query.buildWhere(self.table, clause, index, binds);
-            break;
-          }
-          case "BETWEEN": {
-            query += Query.buildWhereBetween(self.table, clause, index, binds);
-            break;
-          }
-          default: {
-            break;
-          }
-        }
-
-      });
-
-      let stmt = Databases[self.database].database.prepare(query, binds);
-      stmt.bind(binds);
-      let result = stmt.run();
-
-      let data = Databases[self.database].database.save();
-      resolve();
-    });
-  }
-
-  buildSelectSQL(columns = '*') {
-    let rootSelect = Query.buildSelect(options.columns);
-
-    let query = `SELECT`;
-    query += ` ${rootSelect} `;
-    query += ` FROM ${self.table}`;
-
-    //WHERE BUILD
-    let binds = {};
-    self.wheres.forEach(function(clause, index) {
-      switch(clause.type) {
-        case "WHERE": {
-          query += Query.buildWhere(self.table, clause, index, binds);
-          break;
-        }
-        case "BETWEEN": {
-          query += Query.buildWhereBetween(self.table, clause, index, binds);
-          break;
-        }
-        default: {
-          break;
-        }
+    switch(this.type) {
+      case QueryType.SELECT: {
+        query = buildSelectSQL();
+        break;
       }
-
-    });
-
-    if(self.limit) {
-      query += ` LIMIT ${self.limit}`;
-    }
-
-    if(self.offset) {
-      query += ` OFFSET ${self.offset}`;
+      case QueryType.INSERT: {
+        break;
+      }
+      case QueryType.UPDATE: {
+        break;
+      }
+      case QueryType.DELETE: {
+        break;
+      }
     }
 
     return query;
-  }
-
-  select(columns = '*') {
-    if(!this.table) { throw new Error('Query.where: no table name')};
-    return new Promise((resolve, reject) => {
-
-      //BUILD SELECT
-      let query = Query.buildSelectSQL(columns);
-      //DATABASE EXECUTION
-      let stmt = Databases[this.database].database.prepare(query);
-      try {
-        stmt.bind(binds);
-      }
-      catch(e) {
-        throw new Error(e);
-      }
-
-
-      let results = [];
-
-      while(stmt.step()) {
-        var row = stmt.getAsObject();
-        results.push(row);
-      }
-
-      resolve(results);
-
-    });
-  }
-
-  static raw(db, sql = null) {
-    return new Promise((resolve, reject) => {
-      let results = Databases[db].database.exec(sql);
-      resolve(results);
-    });
-  }
-
-  static rawSync(db, sql = null) {
-    return Databases[db].database.exec(sql);
-  }
-
-  getColumnNames(db, table) {
-    var stmt = Databases[db].database.prepare(`SELECT * FROM ${table}`);
-    stmt.run()
-    return stmt.getColumnNames();
   }
 }
 
