@@ -16,6 +16,18 @@ describe('Query', function() {
 
 });
 
+describe('Query.table', function() {
+  it('Should throw an error if the table name has not been defined', function() {
+    chai.expect(() => Query.table()).to.throw(Error);
+  });
+  it('Should throw an error if the table name is not a string', function() {
+    chai.expect(() => Query.table(1)).to.throw(Error);
+  });
+  it('Should return an instance of Query', function() {
+    chai.expect(Query.table('test') instanceof Query).to.equal(true);
+  });
+});
+
 describe('Query.select', function() {
   let query;
   beforeEach(function(){
@@ -87,18 +99,13 @@ describe('Query.where', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
+      it('Should have added the column to the where object', function() {
         query.where('id').equals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
-      it('Should have created a valid where clause object', function() {
-        query.where('id').equals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('=');
       });
       it('Should return the query', function() {
         let q = query.where('id').equals(1);
@@ -115,18 +122,13 @@ describe('Query.where', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
+      it('Should have added the column to the where object', function() {
         query.where('id').notEquals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
-      it('Should have created a valid where clause object', function() {
-        query.where('id').notEquals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('!=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('!=');
       });
       it('Should return the query', function() {
         let q = query.where('id').notEquals(1);
@@ -144,18 +146,13 @@ describe('Query.where', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
+      it('Should have added the column to the where object', function() {
         query.where('id').lessThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
-      it('Should have created a valid where clause object', function() {
-        query.where('id').lessThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('<');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('<');
       });
       it('Should return the query', function() {
         let q = query.where('id').lessThan(1);
@@ -173,18 +170,13 @@ describe('Query.where', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
+      it('Should have added the column to the where object', function() {
         query.where('id').greaterThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
-      it('Should have created a valid where clause object', function() {
-        query.where('id').greaterThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('>');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('>');
       });
       it('Should return the query', function() {
         let q = query.where('id').greaterThan(1);
@@ -202,18 +194,13 @@ describe('Query.where', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
+      it('Should have added the column to the where object', function() {
         query.where('id').like(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
-      it('Should have created a valid where clause object', function() {
-        query.where('id').like(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('like');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal('%'+1+'%');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal('%'+1+'%');
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('like');
       });
       it('Should return the query', function() {
         let q = query.where('id').like(1);
@@ -232,17 +219,15 @@ describe('Query.where', function() {
         chai.expect(q).to.have.property('and');
         chai.expect(q.and).to.be.a('function');
       });
-      it('Should create a valid where object', function() {
-        query.where('test').between(1).and(100);
-        chai.expect(query.wheres.length).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('test');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('between');
-        chai.expect(query.wheres[0]).to.have.property('start');
-        chai.expect(query.wheres[0].start).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('end');
-        chai.expect(query.wheres[0].end).to.equal(100);
+      it('Should have added the column to the where object', function() {
+        query.where('id').between(1).and(100);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('BETWEEN');
+        chai.expect(query.wheres.id).to.have.property('start');
+        chai.expect(query.wheres.id.start).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('end');
+        chai.expect(query.wheres.id.end).to.equal(100);
       });
     });
   });
@@ -265,20 +250,15 @@ describe('Query.andWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').equals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').equals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('=');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').equals(1);
@@ -295,20 +275,15 @@ describe('Query.andWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').notEquals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').notEquals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('!=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('!=');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').notEquals(1);
@@ -326,20 +301,15 @@ describe('Query.andWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').lessThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').lessThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('<');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('<');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').lessThan(1);
@@ -357,20 +327,15 @@ describe('Query.andWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').greaterThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').greaterThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('>');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('>');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').greaterThan(1);
@@ -388,20 +353,15 @@ describe('Query.andWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').like(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').like(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('like');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal('%'+1+'%');
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal('%'+1+'%');
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('like');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').like(1);
@@ -420,19 +380,15 @@ describe('Query.andWhere', function() {
         chai.expect(q).to.have.property('and');
         chai.expect(q.and).to.be.a('function');
       });
-      it('Should create a valid where object', function() {
-        query.andWhere('test').between(1).and(100);
-        chai.expect(query.wheres.length).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('test');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('between');
-        chai.expect(query.wheres[0]).to.have.property('start');
-        chai.expect(query.wheres[0].start).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('end');
-        chai.expect(query.wheres[0].end).to.equal(100);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+      it('Should have created a valid where clause object', function() {
+        query.andWhere('id').between(1).and(100);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('AND');
+        chai.expect(query.wheres.id).to.have.property('start');
+        chai.expect(query.wheres.id.start).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('end');
+        chai.expect(query.wheres.id.end).to.equal(100);
       });
     });
   });
@@ -455,20 +411,15 @@ describe('Query.orWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.orWhere('id').equals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').equals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('OR');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('=');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
       });
       it('Should return the query', function() {
         let q = query.orWhere('id').equals(1);
@@ -476,7 +427,7 @@ describe('Query.orWhere', function() {
       });
     });
   });
-  it('Should return a orEquals function', function() {
+  it('Should return a notEquals function', function() {
     let q = query.orWhere('id');
     chai.expect(q).to.have.property('notEquals');
     chai.expect(q.notEquals).to.be.a('function');
@@ -485,20 +436,15 @@ describe('Query.orWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.orWhere('id').notEquals(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').notEquals(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('!=');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('OR');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('!=');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
       });
       it('Should return the query', function() {
         let q = query.orWhere('id').notEquals(1);
@@ -516,20 +462,15 @@ describe('Query.orWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.orWhere('id').lessThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').lessThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('<');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('OR');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('<');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
       });
       it('Should return the query', function() {
         let q = query.orWhere('id').lessThan(1);
@@ -547,20 +488,15 @@ describe('Query.orWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.orWhere('id').greaterThan(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').greaterThan(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('>');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('OR');
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('>');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
       });
       it('Should return the query', function() {
         let q = query.orWhere('id').greaterThan(1);
@@ -578,20 +514,15 @@ describe('Query.orWhere', function() {
       beforeEach(function(){
         query = new Query();
       });
-      it('Should have pushed a where clause to the wheres array', function() {
-        query.andWhere('id').like(1);
-        chai.expect(query.wheres.length).to.equal(1);
-      });
       it('Should have created a valid where clause object', function() {
-        query.andWhere('id').like(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('id');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('like');
-        chai.expect(query.wheres[0]).to.have.property('value');
-        chai.expect(query.wheres[0].value).to.equal('%'+1+'%');
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+        query.orWhere('id').like(1);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('value');
+        chai.expect(query.wheres.id.value).to.equal('%'+1+'%');
+        chai.expect(query.wheres.id).to.have.property('predicate');
+        chai.expect(query.wheres.id.predicate).to.equal('like');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
       });
       it('Should return the query', function() {
         let q = query.andWhere('id').like(1);
@@ -610,92 +541,71 @@ describe('Query.orWhere', function() {
         chai.expect(q).to.have.property('and');
         chai.expect(q.and).to.be.a('function');
       });
-      it('Should create a valid where object', function() {
-        query.andWhere('test').between(1).and(100);
-        chai.expect(query.wheres.length).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('column');
-        chai.expect(query.wheres[0].column).to.equal('test');
-        chai.expect(query.wheres[0]).to.have.property('predicate');
-        chai.expect(query.wheres[0].predicate).to.equal('between');
-        chai.expect(query.wheres[0]).to.have.property('start');
-        chai.expect(query.wheres[0].start).to.equal(1);
-        chai.expect(query.wheres[0]).to.have.property('end');
-        chai.expect(query.wheres[0].end).to.equal(100);
-        chai.expect(query.wheres[0]).to.have.property('conditional');
-        chai.expect(query.wheres[0].conditional).to.equal('AND');
+      it('Should have created a valid where clause object', function() {
+        query.orWhere('id').between(1).and(100);
+        chai.expect(query.wheres).to.have.property('id');
+        chai.expect(query.wheres.id).to.have.property('conditional');
+        chai.expect(query.wheres.id.conditional).to.equal('OR');
+        chai.expect(query.wheres.id).to.have.property('start');
+        chai.expect(query.wheres.id.start).to.equal(1);
+        chai.expect(query.wheres.id).to.have.property('end');
+        chai.expect(query.wheres.id.end).to.equal(100);
       });
     });
   });
 });
 
 describe('Query.update', function() {
-  let query;
-  beforeEach(function(){
-    query = new Query();
-  });
   it('Should throw an error if another query type has been started', function() {
+    let query = Query.table('test');
     chai.expect(() => query.delete().where('id').equals(1).update('test')).to.throw(Error);
   });
-  it('Should throw an error if argument is not a string or an array', function() {
-    chai.expect(() => query.update(1)).to.throw(Error);
-  });
-  it('Should return a function called with if a string is passed', function() {
-    let q = query.update('test');
-    chai.expect(q).to.have.property('with');
-    chai.expect(q.with).to.be.a('function');
-
-    describe('Query.update.with (string)', function() {
-      let query;
-      beforeEach(function(){
-        query = new Query();
-      });
-      it('Should return itself', function() {
-        let q = query.update('test').with(1);
-        chai.expect(q).to.equal(query);
-      });
-      it('Should build a valid update object', function() {
-        query.update('test').with(1);
-        chai.expect(query.updates.length).to.equal(1);
-        chai.expect(query.updates[0]).to.have.property('column');
-        chai.expect(query.updates[0].column).to.equal('test');
-        chai.expect(query.updates[0]).to.have.property('value');
-        chai.expect(query.updates[0].value).to.equal(1);
-      });
+  it('Should add new columns to the update object', function() {
+    let query = Query.table('test');
+    query.update({
+      'id': 1,
+      'title': 'test'
     });
-  });
-  it('Should return a function called with if an array is passed', function() {
-    let q = query.update('test');
-    chai.expect(q).to.have.property('with');
-    chai.expect(q.with).to.be.a('function');
 
-    describe('Query.update.with (array)', function() {
-      let query;
-      beforeEach(function(){
-        query = new Query();
-      });
-      it('Should return itself', function() {
-        let q = query.update(['test', 'id']).with(['foo', 1]);
-        chai.expect(q).to.equal(query);
-      });
-      it('Should throw an error if an array is not passed', function() {
-        chai.expect(() => query.update(['test', 'id', 'name']).with(1)).to.throw(Error);
-      });
-      it('Should throw an error if an array of different length is passed', function() {
-        chai.expect(() => query.update(['test', 'id', 'name']).with(['1'])).to.throw(Error);
-      });
-      it('Should create valid update objects', function() {
-        query.update(['test', 'id']).with(['foo', 1]);
-        chai.expect(query.updates.length).to.equal(2);
-        chai.expect(query.updates[0]).to.have.property('column');
-        chai.expect(query.updates[0].column).to.equal('test');
-        chai.expect(query.updates[0]).to.have.property('value');
-        chai.expect(query.updates[0].value).to.equal('foo');
-        chai.expect(query.updates[1]).to.have.property('column');
-        chai.expect(query.updates[1].column).to.equal('id');
-        chai.expect(query.updates[1]).to.have.property('value');
-        chai.expect(query.updates[1].value).to.equal(1);
-      });
+    chai.expect(query.updates).to.have.property('id');
+    chai.expect(query.updates.id).to.equal(1);
+    chai.expect(query.updates).to.have.property('title');
+    chai.expect(query.updates.title).to.equal('test');
+  });
+  it('Should add more columns with successive update calls', function() {
+    let query = Query.table('test');
+    query.update({
+      'id': 1,
+      'title': 'test'
     });
+
+    query.update({
+      'copy': 'test copy'
+    });
+
+    chai.expect(query.updates).to.have.property('id');
+    chai.expect(query.updates.id).to.equal(1);
+    chai.expect(query.updates).to.have.property('title');
+    chai.expect(query.updates.title).to.equal('test');
+    chai.expect(query.updates).to.have.property('copy');
+    chai.expect(query.updates.copy).to.equal('test copy');
+
+  });
+  it('Should overwrite already set columns with a new value', function() {
+    let query = Query.table('test');
+    query.update({
+      'id': 1,
+      'title': 'test'
+    });
+
+    query.update({
+      'title': 'overwrite'
+    });
+
+    chai.expect(query.updates).to.have.property('id');
+    chai.expect(query.updates.id).to.equal(1);
+    chai.expect(query.updates).to.have.property('title');
+    chai.expect(query.updates.title).to.equal('overwrite');
   });
 });
 
@@ -709,18 +619,29 @@ describe('Query.insert', function() {
       'title': 'test'
     })).to.throw(Error);
   });
-  it('Should push an insert object an array', function() {
-    query.insert({
-      title: 'test',
-      id: 1
-    });
+  it('Should throw an error if the insert argument is not an array', function() {
+    chai.expect(() => query.insert({})).to.throw(Error);
+  });
+  it('Should push an insert object to the inserts array', function() {
+    query.insert([
+      {'title': 'test', 'id': 1}
+    ]);
     chai.expect(query.inserts.length).to.equal(1);
   });
+  it('Should push all insert objects to the inserts array', function() {
+    query.insert([
+      {'title': 'test', 'id': 1},
+      {'title': 'test 2', 'id': 2},
+      {'title': 'test 3', 'id': 3},
+      {'title': 'test 4', 'id': 4},
+      {'title': 'test 5', 'id': 5}
+    ]);
+    chai.expect(query.inserts.length).to.equal(5);
+  });
   it('Should return itself', function() {
-    let q = query.insert({
-      title: 'test',
-      id: 1
-    });
+    let q = query.insert([
+      {'title': 'test', 'id': 2}
+    ]);
     chai.expect(q).to.equal(query);
   });
 });
@@ -733,214 +654,10 @@ describe('Query.delete', function() {
   it('Should throw an error if another query type has been started', function() {
     chai.expect(() => query.select('id').where('id').equals(1).delete()).to.throw(Error);
   });
-  it('Should return a where function', function() {
+  it('Should return this.where function', function() {
     let q = query.delete();
     chai.expect(q).to.have.property('where');
     chai.expect(q.where).to.be.a('function');
-
-    describe('Query.delete.where', function() {
-      let query;
-      beforeEach(function(){
-        query = new Query();
-      });
-
-      it('Should throw an error if the argument is not a string', function() {
-        chai.expect(() => query.delete().where(1)).to.throw(Error);
-      });
-      it('Should return an equals function', function() {
-        let q = query.delete().where('id');
-        chai.expect(q).to.have.property('equals');
-        chai.expect(q.equals).to.be.a('function');
-        describe('Query.delete.where.equals', function() {
-          let query;
-          beforeEach(function(){
-            query = new Query();
-          });
-          it('Should have pushed a delete clause to the delete array', function() {
-            query.delete().where('id').equals(1);
-            chai.expect(query.deletes.length).to.equal(1);
-          });
-          it('Should have created a valid where clause object', function() {
-            query.delete().where('id').equals(1);
-            chai.expect(query.deletes[0]).to.have.property('column');
-            chai.expect(query.deletes[0].column).to.equal('id');
-            chai.expect(query.deletes[0]).to.have.property('predicate');
-            chai.expect(query.deletes[0].predicate).to.equal('=');
-            chai.expect(query.deletes[0]).to.have.property('value');
-            chai.expect(query.deletes[0].value).to.equal(1);
-          });
-          it('Should return the query', function() {
-            let q = query.delete().where('id').equals(1);
-            chai.expect(q).to.equal(query);
-          });
-        });
-      });
-      it('Should return a notEquals function', function() {
-        let q = query.delete().where('id');
-        chai.expect(q).to.have.property('notEquals');
-        chai.expect(q.equals).to.be.a('function');
-        describe('Query.delete.where.notEquals', function() {
-          let query;
-          beforeEach(function(){
-            query = new Query();
-          });
-          it('Should have pushed a delete clause to the delete array', function() {
-            query.delete().where('id').notEquals(1);
-            chai.expect(query.deletes.length).to.equal(1);
-          });
-          it('Should have created a valid where clause object', function() {
-            query.delete().where('id').notEquals(1);
-            chai.expect(query.deletes[0]).to.have.property('column');
-            chai.expect(query.deletes[0].column).to.equal('id');
-            chai.expect(query.deletes[0]).to.have.property('predicate');
-            chai.expect(query.deletes[0].predicate).to.equal('!=');
-            chai.expect(query.deletes[0]).to.have.property('value');
-            chai.expect(query.deletes[0].value).to.equal(1);
-          });
-          it('Should return the query', function() {
-            let q = query.delete().where('id').notEquals(1);
-            chai.expect(q).to.equal(query);
-          });
-        });
-      });
-      it('Should return a lessThan function', function() {
-        let q = query.delete().where('id');
-        chai.expect(q).to.have.property('lessThan');
-        chai.expect(q.equals).to.be.a('function');
-        describe('Query.delete.where.lessThan', function() {
-          let query;
-          beforeEach(function(){
-            query = new Query();
-          });
-          it('Should have pushed a delete clause to the delete array', function() {
-            query.delete().where('id').lessThan(1);
-            chai.expect(query.deletes.length).to.equal(1);
-          });
-          it('Should have created a valid where clause object', function() {
-            query.delete().where('id').lessThan(1);
-            chai.expect(query.deletes[0]).to.have.property('column');
-            chai.expect(query.deletes[0].column).to.equal('id');
-            chai.expect(query.deletes[0]).to.have.property('predicate');
-            chai.expect(query.deletes[0].predicate).to.equal('<');
-            chai.expect(query.deletes[0]).to.have.property('value');
-            chai.expect(query.deletes[0].value).to.equal(1);
-          });
-          it('Should return the query', function() {
-            let q = query.delete().where('id').lessThan(1);
-            chai.expect(q).to.equal(query);
-          });
-        });
-      });
-      it('Should return a greaterThan function', function() {
-        let q = query.delete().where('id');
-        chai.expect(q).to.have.property('greaterThan');
-        chai.expect(q.equals).to.be.a('function');
-        describe('Query.delete.where.greaterThan', function() {
-          let query;
-          beforeEach(function(){
-            query = new Query();
-          });
-          it('Should have pushed a delete clause to the delete array', function() {
-            query.delete().where('id').greaterThan(1);
-            chai.expect(query.deletes.length).to.equal(1);
-          });
-          it('Should have created a valid where clause object', function() {
-            query.delete().where('id').greaterThan(1);
-            chai.expect(query.deletes[0]).to.have.property('column');
-            chai.expect(query.deletes[0].column).to.equal('id');
-            chai.expect(query.deletes[0]).to.have.property('predicate');
-            chai.expect(query.deletes[0].predicate).to.equal('>');
-            chai.expect(query.deletes[0]).to.have.property('value');
-            chai.expect(query.deletes[0].value).to.equal(1);
-          });
-          it('Should return the query', function() {
-            let q = query.delete().where('id').greaterThan(1);
-            chai.expect(q).to.equal(query);
-          });
-        });
-      });
-      it('Should return a like function', function() {
-        let q = query.delete().where('id');
-        chai.expect(q).to.have.property('like');
-        chai.expect(q.equals).to.be.a('function');
-        describe('Query.delete.where.like', function() {
-          let query;
-          beforeEach(function(){
-            query = new Query();
-          });
-          it('Should have pushed a delete clause to the delete array', function() {
-            query.delete().where('id').like(1);
-            chai.expect(query.deletes.length).to.equal(1);
-          });
-          it('Should have created a valid where clause object', function() {
-            query.delete().where('id').like(1);
-            chai.expect(query.deletes[0]).to.have.property('column');
-            chai.expect(query.deletes[0].column).to.equal('id');
-            chai.expect(query.deletes[0]).to.have.property('predicate');
-            chai.expect(query.deletes[0].predicate).to.equal('like');
-            chai.expect(query.deletes[0]).to.have.property('value');
-            chai.expect(query.deletes[0].value).to.equal('%'+1+'%');
-          });
-          it('Should return the query', function() {
-            let q = query.delete().where('id').like(1);
-            chai.expect(q).to.equal(query);
-          });
-        });
-      });
-    });
-  });
-});
-
-describe('Query.join', function() {
-  let query;
-  beforeEach(function(){
-    query = new Query();
-  });
-  it('Should throw an error if the argument is not a string', function() {
-    chai.expect(() => query.join(1)).to.throw(Error);
-  });
-  it('Should return a function called on', function() {
-    let q = query.join('test');
-    chai.expect(q).to.have.property('on');
-    chai.expect(q.on).to.be.a('function');
-
-    describe('Query.join.on', function() {
-      let query;
-      beforeEach(function(){
-        query = new Query();
-      });
-      it('Should throw an error if the column name is not a string', function() {
-        chai.expect(() => query.join('test').on(1)).to.throw(Error);
-      });
-      it('Should return an equals function', function() {
-        let q = query.join('test').on('test_id');
-        chai.expect(q).to.have.property('equals');
-        chai.expect(q.equals).to.be.a('function');
-      });
-    });
-  });
-  it('Should have created a valid join clause object', function() {
-
-    describe('Query.join.on.equals', function() {
-      let query;
-      beforeEach(function(){
-        query = new Query();
-      });
-      it('Should have created a valid equals join', function() {
-        query.join('test').on('test_id').equals('id');
-        chai.expect(query.joins.length).to.equal(1);
-        chai.expect(query.joins[0]).to.have.property('type');
-        chai.expect(query.joins[0].type).to.equal('INNER');
-        chai.expect(query.joins[0]).to.have.property('joinColumn');
-        chai.expect(query.joins[0].joinColumn).to.equal('test_id');
-        chai.expect(query.joins[0]).to.have.property('table');
-        chai.expect(query.joins[0].table).to.equal('test');
-        chai.expect(query.joins[0]).to.have.property('predicate');
-        chai.expect(query.joins[0].predicate).to.equal('=');
-        chai.expect(query.joins[0]).to.have.property('value');
-        chai.expect(query.joins[0].value).to.equal('id');
-      });
-    });
   });
 });
 
@@ -957,186 +674,191 @@ describe('Query.buildSQL', function() {
     chai.expect(build).to.have.property('binds');
   });
   it('Should return a correct select and where clause (SELECT equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id_0`;
-    query.select(['id', 'title']).from('tests').where('id').equals(1);
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' != :tests_id_0`;
-
-    query.select(['id', 'title']).from('tests').where('id').notEquals(1);
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' != :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('id').notEquals(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' > :tests_id_0`;
-    query.select(['id', 'title']).from('tests').where('id').greaterThan(1);
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' > :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('id').greaterThan(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' < :tests_id_0`;
-    query.select(['id', 'title']).from('tests').where('id').lessThan(1);
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' < :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('id').lessThan(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' like :tests_title_0`;
-    query.select(['id', 'title']).from('tests').where('title').like('test');
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' like :tests_title`;
+    let build = query.select(['id', 'title']).from('tests').where('title').like('test').buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('%test%');
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('%test%');
   });
   it('Should return a correct select and whereBetween clause (SELECT whereBetween)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' BETWEEN :tests_id_start_0 AND :tests_id_end_0`;
-    query.select(['id', 'title']).from('tests').where('id').between(1).and(100);
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' BETWEEN :tests_id_start AND :tests_id_end`;
+    let build = query.select(['id', 'title']).from('tests').where('id').between(1).and(100).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_start_0');
-    chai.expect(build.binds[':tests_id_start_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_id_end_0');
-    chai.expect(build.binds[':tests_id_end_0']).to.equal(100);
+    chai.expect(build.binds).to.have.property(':tests_id_start');
+    chai.expect(build.binds[':tests_id_start']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id_end');
+    chai.expect(build.binds[':tests_id_end']).to.equal(100);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id_0 AND tests.'title' = :tests_title_1`;
-    query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').equals('test');
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id AND tests.'title' = :tests_title`;
+    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').equals('test').buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
 
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id_0 AND tests.'title' != :tests_title_1`;
-    query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').notEquals('test');
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id AND tests.'title' != :tests_title`;
+    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').notEquals('test').buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 AND tests.'id' > :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').greaterThan(1);
-
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' > :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').greaterThan(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 AND tests.'id' < :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').lessThan(1);
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' < :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').lessThan(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 AND tests.'id' like :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').like(1);
-    let build = query.buildSQL();
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' like :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').like(1).buildSQL();
 
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal('%1%');
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal('%1%');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id_0 OR tests.'title' = :tests_title_1`;
-    query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').equals('test');
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id OR tests.'title' = :tests_title`;
+    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').equals('test').buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id_0 OR tests.'title' != :tests_title_1`;
-    query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').notEquals('test');
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id OR tests.'title' != :tests_title`;
+    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').notEquals('test').buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 OR tests.'id' > :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').greaterThan(1);
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' > :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').greaterThan(1).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 OR tests.'id' < :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').lessThan(1);
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' < :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').lessThan(1).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title_0 OR tests.'id' like :tests_id_1`;
-    query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').like(1);
+    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' like :tests_id`;
+    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').like(1).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_id_1');
-    chai.expect(build.binds[':tests_id_1']).to.equal('%1%');
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal('%1%');
   });
   it('Should return a correct select and where, andwhere, andwhere clause (SELECT equals andWhere equals andWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id' FROM tests WHERE tests.'title' = :tests_title_0 AND tests.'author' = :tests_author_1 AND tests.'id' > :tests_id_2`;
-    query.select('id').from('tests').where('title').equals('test').andWhere('author').equals('dave').andWhere('id').greaterThan(1);
+    let sql = `SELECT tests.'id' FROM tests WHERE tests.'title' = :tests_title AND tests.'author' = :tests_author AND tests.'id' > :tests_id`;
+    let build = query.select('id').from('tests').where('title').equals('test').andWhere('author').equals('dave').andWhere('id').greaterThan(1).buildSQL();
 
-    let build = query.buildSQL();
     chai.expect(build.sql == sql).to.equal(true);
-    chai.expect(build.binds).to.have.property(':tests_title_0');
-    chai.expect(build.binds[':tests_title_0']).to.equal('test');
-    chai.expect(build.binds).to.have.property(':tests_author_1');
-    chai.expect(build.binds[':tests_author_1']).to.equal('dave');
-    chai.expect(build.binds).to.have.property(':tests_id_2');
-    chai.expect(build.binds[':tests_id_2']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_author');
+    chai.expect(build.binds[':tests_author']).to.equal('dave');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+  });
+  it('Should return a correct SQL Update statement', function() {
+    let sql = `UPDATE test SET test.'id' = :update_id, test.'title' = :update_title WHERE test.'id' = :test_id`;
+    let build = Query.table('test').update({
+      'id': 1,
+      'title': 'test'
+    }).where('id').equals(1).buildSQL();
+
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+  it('Should return a correct SQL Insert statement', function() {
+    let sql = `INSERT INTO test (column_1, column_2) VALUES (:insert_column_1_0, :insert_column_2_0)`;
+
+    let build = Query.table('test').insert([
+      {column_1: 'test', column_2: 'test_1'}
+    ]).buildSQL();
+
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+  it('Should return a correct SQL Delete statement', function() {
+    let sql = `DELETE FROM test WHERE test.'id' = :test_id`;
+    let build = Query.table('test').delete().where('id').equals(1).buildSQL();
+
+    chai.expect(build.sql == sql).to.equal(true);
   });
 });
 
@@ -1159,7 +881,6 @@ describe('Query.buildSelectSQL', function() {
     let sql = `SELECT tests.'id', tests.'test', tests.'title' FROM tests`;
     chai.expect(query.buildSelectSQL() == sql).to.equal(true);
   });
-
 });
 
 describe('Query.buildWhereSQL', function() {
@@ -1176,7 +897,7 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('binds');
   });
   it('Should return a correct SQL Where statement (equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0`;
+    let sql = `WHERE tests.'id' = :tests_id`;
     query.select('id').from('tests').where('id').equals(1);
 
     let build = query.buildWhereSQL();
@@ -1184,12 +905,12 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
 
   });
   it('Should return a correct SQL Where statement (notEquals)', function() {
-    let sql = `WHERE tests.'id' != :tests_id_0`;
+    let sql = `WHERE tests.'id' != :tests_id`;
     query.select('id').from('tests').where('id').notEquals(1);
 
     let build = query.buildWhereSQL();
@@ -1197,12 +918,12 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
 
   });
   it('Should return a correct SQL Where statement (greaterThan)', function() {
-    let sql = `WHERE tests.'id' > :tests_id_0`;
+    let sql = `WHERE tests.'id' > :tests_id`;
     query.select('id').from('tests').where('id').greaterThan(1);
 
     let build = query.buildWhereSQL();
@@ -1210,11 +931,11 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct SQL Where statement (lessthan)', function() {
-    let sql = `WHERE tests.'id' < :tests_id_0`;
+    let sql = `WHERE tests.'id' < :tests_id`;
     query.select('id').from('tests').where('id').lessThan(1);
 
     let build = query.buildWhereSQL();
@@ -1222,11 +943,11 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
   });
   it('Should return a correct SQL Where statement (like)', function() {
-    let sql = `WHERE tests.'id' like :tests_id_0`;
+    let sql = `WHERE tests.'id' like :tests_id`;
     query.select('id').from('tests').where('id').like(1);
 
     let build = query.buildWhereSQL();
@@ -1234,11 +955,11 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal('%1%');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal('%1%');
   });
   it('Should return a correct SQL Where statement (andWhere equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 AND tests.'title' = :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' = :tests_title`;
     query.select('id').from('tests').where('id').equals(1).andWhere('title').equals('test');
 
     let build = query.buildWhereSQL();
@@ -1246,13 +967,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (andWhere notEquals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 AND tests.'title' != :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' != :tests_title`;
     query.select('id').from('tests').where('id').equals(1).andWhere('title').notEquals('test');
 
     let build = query.buildWhereSQL();
@@ -1260,13 +981,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (andWhere lessThan)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 AND tests.'title' < :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' < :tests_title`;
     query.select('id').from('tests').where('id').equals(1).andWhere('title').lessThan(100);
 
     let build = query.buildWhereSQL();
@@ -1274,13 +995,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal(100);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal(100);
   });
   it('Should return a correct SQL Where statement (andWhere like)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 AND tests.'title' like :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' like :tests_title`;
     query.select('id').from('tests').where('id').equals(1).andWhere('title').like('test');
 
     let build = query.buildWhereSQL();
@@ -1288,14 +1009,14 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('%test%');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('%test%');
   });
 
   it('Should return a correct SQL Where statement (orWhere equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 OR tests.'title' = :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' = :tests_title`;
     query.select('id').from('tests').where('id').equals(1).orWhere('title').equals('test');
 
     let build = query.buildWhereSQL();
@@ -1303,13 +1024,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (orWhere notEquals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 OR tests.'title' != :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' != :tests_title`;
     query.select('id').from('tests').where('id').equals(1).orWhere('title').notEquals('test');
 
     let build = query.buildWhereSQL();
@@ -1317,13 +1038,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('test');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (orWhere lessThan)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 OR tests.'title' < :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' < :tests_title`;
     query.select('id').from('tests').where('id').equals(1).orWhere('title').lessThan(100);
 
     let build = query.buildWhereSQL();
@@ -1331,13 +1052,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal(100);
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal(100);
   });
   it('Should return a correct SQL Where statement (orWhere like)', function() {
-    let sql = `WHERE tests.'id' = :tests_id_0 OR tests.'title' like :tests_title_1`;
+    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' like :tests_title`;
     query.select('id').from('tests').where('id').equals(1).orWhere('title').like('test');
 
     let build = query.buildWhereSQL();
@@ -1345,13 +1066,13 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_0');
-    chai.expect(build.binds[':tests_id_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_title_1');
-    chai.expect(build.binds[':tests_title_1']).to.equal('%test%');
+    chai.expect(build.binds).to.have.property(':tests_id');
+    chai.expect(build.binds[':tests_id']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_title');
+    chai.expect(build.binds[':tests_title']).to.equal('%test%');
   });
   it('Should return a correct SQL Where statement (whereBetween)', function() {
-    let sql = `WHERE tests.'id' BETWEEN :tests_id_start_0 AND :tests_id_end_0`;
+    let sql = `WHERE tests.'id' BETWEEN :tests_id_start AND :tests_id_end`;
     query.select('id').from('tests').where('id').between(1).and(100);
 
     let build = query.buildWhereSQL();
@@ -1359,9 +1080,100 @@ describe('Query.buildWhereSQL', function() {
     chai.expect(build).to.have.property('sql');
     chai.expect(build.sql == sql).to.equal(true);
     chai.expect(build).to.have.property('binds');
-    chai.expect(build.binds).to.have.property(':tests_id_start_0');
-    chai.expect(build.binds[':tests_id_start_0']).to.equal(1);
-    chai.expect(build.binds).to.have.property(':tests_id_end_0');
-    chai.expect(build.binds[':tests_id_end_0']).to.equal(100);
+    chai.expect(build.binds).to.have.property(':tests_id_start');
+    chai.expect(build.binds[':tests_id_start']).to.equal(1);
+    chai.expect(build.binds).to.have.property(':tests_id_end');
+    chai.expect(build.binds[':tests_id_end']).to.equal(100);
   });
+});
+
+describe('Query.buildUpdateSQL', function() {
+  let query;
+  beforeEach(function() {
+    query = Query.table('test');
+  });
+  it('Should return an object with binds and sql', function() {
+    let build = query.update({
+      column_1: 'test',
+      column_2: 'test_1'
+    }).where('id').equals(1).buildUpdateSQL();
+
+    chai.expect(build).to.have.property('binds');
+    chai.expect(build).to.have.property('sql');
+    chai.expect(build.sql).to.be.a('string');
+    chai.expect(build.binds).to.be.an('object');
+  });
+  it('Should return a valid SQL update statement', function() {
+    let sql = `UPDATE test SET test.'column_1' = :update_column_1, test.'column_2' = :update_column_2`;
+    let build = query.update({
+      'column_1': 'test',
+      'column_2': 'test_2'
+    }).where('id').equals(1).buildUpdateSQL();
+
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+});
+
+describe('Query.buildInsertSQL', function() {
+  let query;
+  beforeEach(function() {
+    query = Query.table('test');
+  });
+  it('Should return an object', function() {
+    query.insert([{
+      'id': 1,
+      'title': 'test',
+      'copy': 'test copy'
+    }]);
+    let build = query.buildInsertSQL();
+    chai.expect(build).to.have.property('binds');
+    chai.expect(build).to.have.property('sql');
+    chai.expect(build.sql).to.be.a('string');
+    chai.expect(build.binds).to.be.an('object');
+  });
+  it('Should return a valid SQL insert statement (single)', function() {
+    let sql = `INSERT INTO test (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0)`;
+    query.insert([{
+      'id': 1,
+      'title': 'test',
+      'copy': 'test copy'
+    }]);
+
+    let build = query.buildInsertSQL();
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+  it('Should return a valid SQL insert statement (array)', function() {
+    let sql = `INSERT INTO test (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0), (:insert_id_1, :insert_title_1, :insert_copy_1)`;
+    query.insert([
+      {'id': 1, 'title': 'test', 'copy': 'test copy'},
+      {'id': 2, 'title': 'test_2', 'copy': 'test copy 2'}
+    ]);
+
+    let build = query.buildInsertSQL();
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+});
+
+describe('Query.buildDeleteSQL', function() {
+  let query;
+  beforeEach(function() {
+    query = Query.table('test');
+  });
+  it('Should return an object with an sql property', function() {
+    query.delete().where('id').equals(1);
+    let build = query.buildDeleteSQL();
+    chai.expect(build).to.have.property('sql');
+    chai.expect(build.sql).to.be.a('string');
+  });
+  it('Should return a valid SQL delete statement', function() {
+    let sql = `DELETE FROM test`;
+    query.delete().where('id').equals(1);
+
+    let build = query.buildDeleteSQL();
+    chai.expect(build.sql == sql).to.equal(true);
+  });
+});
+
+describe('Query.get', function() {
+
 });

@@ -8,19 +8,19 @@ const QueryType = {
 }
 
 class Query {
-  constructor() {
+  constructor(options = {
+    table: null
+  }) {
 
     let _selects = {
       columns: [],
       table: null
     };
-    let _wheres = [];
-    let _joins = [];
-    let _updates = [];
+    let _wheres = {};
+    let _updates = {};
     let _inserts = [];
-    let _deletes = [];
     let _type = null;
-    let _table = null;
+    let _table = options.table;
 
     Object.defineProperty(this, 'table', {
       enumerable: true,
@@ -62,16 +62,6 @@ class Query {
       }
     });
 
-    Object.defineProperty(this, 'joins', {
-      enumerable: false,
-      get() {
-        return _joins;
-      },
-      set(value) {
-        _wheres = value;
-      }
-    });
-
     Object.defineProperty(this, 'updates', {
       enumerable: false,
       get() {
@@ -92,24 +82,28 @@ class Query {
       }
     });
 
-    Object.defineProperty(this, 'deletes', {
-      enumerable: false,
-      get() {
-        return _deletes;
-      },
-      set(value) {
-        _deletes = value;
-      }
-    });
   }
 
-  insert(insertObject) {
+  static table(name = undefined) {
+    if(!name) { throw new Error('Query.table: No table name passed')}
+    if(typeof name !== 'string') { throw new Error('Query.table: Table name is not a string')}
+
+    let instance = new this({
+      table: name
+    });
+
+    return instance;
+
+  }
+
+  insert(insertArray) {
     if(this.type && this.type !== QueryType.INSERT) { throw new Error('Query.insert: Query is of type ', this.type)}
     this.type = QueryType.INSERT;
 
-    if(insertObject.constructor === Object) {
-      this.inserts.push(insertObject);
-    }
+    if(insertArray.constructor !== Array) { throw new Error('Query.insert: argument is not an array')};
+
+    this.inserts = this.inserts.concat(insertArray);
+
     return this;
   }
 
@@ -117,20 +111,7 @@ class Query {
     if(this.type && this.type !== QueryType.DELETE) { throw new Error('Query.delete: Query is of type ', this.type)}
     this.type = QueryType.DELETE;
     return {
-      where: (column) => {
-        if(column.constructor === String) {
-          return {
-            equals: (value) => { this.deletes.push(this.buildDeleteClause(column, '=', value)); return this;},
-            notEquals: (value) => { this.deletes.push(this.buildDeleteClause(column, '!=', value)); return this; },
-            greaterThan: (value) => { this.deletes.push(this.buildDeleteClause(column, '>', value)); return this; },
-            lessThan: (value) => { this.deletes.push(this.buildDeleteClause(column, '<', value)); return this; },
-            like: (value) => { this.deletes.push(this.buildDeleteClause(column, 'like', '%'+value+'%')); return this;}
-          }
-        }
-        else {
-          throw new Error('Query.delete.where: column is not a string');
-        }
-      }
+      where: this.where.bind(this)
     }
   }
 
@@ -166,50 +147,35 @@ class Query {
     }
   }
 
-  update(column = undefined) {
+  update(update = undefined) {
     if(this.type && this.type !== QueryType.UPDATE) { throw new Error('Query.update: Query is of type ', this.type)}
-    this.type = QueryType.UPDATE;
-    if(column.constructor === String) {
-      return {
-        with: (value) => { this.updates.push(this.buildUpdateClause(column, value)); return this; }
-      }
-    }
-    if(column.constructor === Array) {
-      return {
-        with: (values) => {
-          if(values.constructor === Array) {
-            if(values.length !== column.length) { throw new Error('Query.update.with: Columns do not match values count');}
-            column.forEach((col, index) => {
-              this.updates.push(this.buildUpdateClause(col, values[index]));
-            });
-            return this;
-          }
-          else {
-            throw new Error('Query.update.with: array of values not passed');
-          }
-        }
-      }
-    }
 
-    throw new Error('Query.update: argument is not a string or an array');
+    this.type = QueryType.UPDATE;
+    this.updates = Object.assign({}, this.updates, update);
+
+    return this;
   }
 
   where(column = undefined, conditional = undefined) {
     if(column.constructor === String) {
       return {
-        equals: (value) => { this.wheres.push(this.buildWhereClause(column, '=', value, conditional)); return this;},
-        notEquals: (value) => { this.wheres.push(this.buildWhereClause(column, '!=', value, conditional)); return this; },
-        greaterThan: (value) => { this.wheres.push(this.buildWhereClause(column, '>', value, conditional)); return this; },
-        lessThan: (value) => { this.wheres.push(this.buildWhereClause(column, '<', value, conditional)); return this; },
-        like: (value) => { this.wheres.push(this.buildWhereClause(column, 'like', '%'+value+'%', conditional)); return this;},
+        equals: (value) => { this.addWhereClause(this.buildWhereClause(column, '=', value, conditional)); return this;},
+        notEquals: (value) => { this.addWhereClause(this.buildWhereClause(column, '!=', value, conditional)); return this; },
+        greaterThan: (value) => { this.addWhereClause(this.buildWhereClause(column, '>', value, conditional)); return this; },
+        lessThan: (value) => { this.addWhereClause(this.buildWhereClause(column, '<', value, conditional)); return this; },
+        like: (value) => { this.addWhereClause(this.buildWhereClause(column, 'like', '%'+value+'%', conditional)); return this;},
         between: (start) => { return {
-          and: (end) => { this.wheres.push(this.buildWhereBetweenClause(column, start, end, conditional)); return this;}
+          and: (end) => { this.addWhereClause(this.buildWhereBetweenClause(column, start, end, conditional)); return this;}
         }}
       }
     }
     else {
       throw new Error('Query.where: column is not a string');
     }
+  }
+
+  addWhereClause(where = undefined) {
+    this.wheres = Object.assign({}, this.wheres, where);
   }
 
   andWhere(column = undefined) {
@@ -220,76 +186,93 @@ class Query {
     return this.where(column, 'OR');
   }
 
-
-  join(table = undefined, type = 'INNER') {
-    if(table.constructor === String) {
-      return {
-        on: (column) => {
-          if(column.constructor === String) {
-            return {
-              equals: (value) => { this.joins.push(this.buildJoinClause(type, table, column, '=', value)); return this;},
-            }
-          }
-          else {
-            throw new Error('Query.join.on: column is not a string');
-          }
-        }
-      }
-    }
-    else {
-      throw new Error('Query.join: table name is not a string');
-    }
-  }
-
-  buildJoinClause(type = 'INNER', table = undefined, joinColumn = undefined, predicate = undefined, value = undefined) {
-    return {
-      type: type,
-      table: table,
-      joinColumn: joinColumn,
-      predicate: predicate,
-      value: value
-    }
-  }
-
   buildWhereClause(column = undefined, predicate = undefined, value = undefined, conditional = undefined) {
-    return {
-      column: column,
+
+    let obj = {};
+    obj[column] = {
       predicate: predicate,
       value: value,
       conditional: conditional
     }
+
+    return obj;
   }
 
   buildWhereBetweenClause(column = undefined, start = undefined, end = undefined, conditional = undefined) {
-    return {
-      column: column,
-      predicate: 'between',
+
+    let obj = {};
+    obj[column] = {
+      predicate: 'BETWEEN',
+      conditional: conditional,
       start: start,
-      end: end,
-      conditional: conditional
+      end: end
+    }
+
+    return obj;
+  }
+
+  buildInsertSQL() {
+
+    let query = `INSERT INTO ${this.table} `;
+
+    let binds = {};
+    let columns = [];
+    let values = [];
+    let valueSQL = null;
+    let columnSQL = null;
+
+    this.inserts.forEach((clause, index) => {
+      let value = [];
+      for(var col in clause) {
+        if(!columns.includes(col)) {
+          columns.push(col);
+        }
+        let bind = `:insert_${col}_${index}`;
+        binds[bind] = clause[col];
+        value.push(bind);
+      }
+
+      values.push(value);
+    });
+
+    query += `(${columns.join(', ')})`;
+    query += ` VALUES`;
+    query += `${ values.map((valueArray) => ' (' + valueArray.join(', ') + ')' )}`;
+
+    return {
+      binds: binds,
+      sql: query
     }
   }
 
-  buildUpdateClause(column, value) {
+  buildUpdateSQL() {
+    let query = `UPDATE ${this.table} `;
+    query += `SET `
+
+    let binds = {};
+
+    for(let col in this.updates) {
+      let bind = `:update_${col}`;
+      binds[bind] = this.updates[col];
+
+      query += `${this.table}.'${col}' = ${bind}, `;
+    }
+
+    //remove trailing comma and space.
+    query = query.slice(0, -2);
+    query = query.trim();
+
     return {
-      column: column,
-      value: value
+      binds: binds,
+      sql: query
     }
   }
 
-  buildUpdateClause(column, value) {
+  buildDeleteSQL() {
+    let query = `DELETE FROM ${this.table}`;
     return {
-      column: column,
-      value: value
-    }
-  }
-
-  buildDeleteClause(column = undefined, predicate = undefined, value = undefined) {
-    return {
-      column: column,
-      predicate: predicate,
-      value: value
-    }
+      sql: query
+    };
   }
 
   buildSelectSQL() {
@@ -310,44 +293,43 @@ class Query {
     let query = '';
     let binds = {};
 
-    query += this.wheres.reduce((acc, where, index) => {
+    for(let col in this.wheres) {
       let statement = ``;
-      if(where.conditional) {
-        switch(where.conditional) {
+      if(this.wheres[col].conditional) {
+        switch(this.wheres[col].conditional) {
           case 'AND': {
-            statement += `AND `
+            statement += `AND `;
             break;
           }
           case 'OR': {
-            statement += `OR `
+            statement += `OR `;
             break;
           }
         }
       }
       else {
-        statement += `WHERE `
+        statement += `WHERE `;
       }
 
-      statement += `${this.table}.'${where.column}' `;
+      statement += `${this.table}.'${col}' `;
 
-      if(where.predicate == 'between') {
-        let bindStart = `:${this.table}_${where.column}_start_${index}`;
-        let bindEnd = `:${this.table}_${where.column}_end_${index}`;
-
-        binds[":" + this.table + "_" + where.column + "_start_" + index] = where.start;
-        binds[":" + this.table + "_" + where.column + "_end_" + index] = where.end;
+      if(this.wheres[col].predicate == 'BETWEEN') {
+        let bindStart = `:${this.table}_${col}_start`;
+        let bindEnd = `:${this.table}_${col}_end`;
+        binds[bindStart] = this.wheres[col].start;
+        binds[bindEnd] = this.wheres[col].end;
         statement += `BETWEEN ${bindStart} AND ${bindEnd} `;
       }
       else {
-        let bind = `:${this.table}_${where.column}_${index}`;
-        binds[":" + this.table + "_" + where.column + "_" + index] = where.value;
-        statement += `${where.predicate} ${bind} `;
+        let bind = `:${this.table}_${col}`;
+        binds[bind] = this.wheres[col].value;
+        statement += `${this.wheres[col].predicate} ${bind} `;
       }
-      return acc + statement;
-    }, '');
+      query += statement;
+    }
 
-    //remove trailing space.
-    query = query.slice(0, -1);
+    query = query.trim();
+
     return {
       sql: query,
       binds: binds
@@ -356,8 +338,10 @@ class Query {
 
   buildSQL() {
     let query = '';
-    let binds = null;
-    let wheres = null;
+    let binds = {};
+    let queryBinds = null;
+    let queryBuild = null;
+    let queryWhere = null;
 
     switch(this.type) {
       case QueryType.SELECT: {
@@ -365,25 +349,38 @@ class Query {
         break;
       }
       case QueryType.INSERT: {
+        queryBuild = this.buildInsertSQL();
+        query += queryBuild.sql;
+        queryBinds = queryBuild.binds;
         break;
       }
       case QueryType.UPDATE: {
+        queryBuild = this.buildUpdateSQL();
+        query += queryBuild.sql;
+        queryBinds = queryBuild.binds;
         break;
       }
       case QueryType.DELETE: {
+        queryBuild = this.buildDeleteSQL();
+        query += queryBuild.sql;
         break;
       }
     }
 
-    wheres = this.buildWhereSQL();
+    queryWhere = this.buildWhereSQL();
 
-    binds = wheres.binds;
-    query += ' ' + wheres.sql;
+    binds = Object.assign({}, queryBinds, queryWhere.binds);
+    query += ' ' + queryWhere.sql;
+    query = query.trim();
 
     return {
       sql: query,
       binds: binds
     };
+  }
+
+  get() {
+    //STUB
   }
 }
 
