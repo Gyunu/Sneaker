@@ -81,7 +81,6 @@ class Query {
         _inserts = value;
       }
     });
-
   }
 
   static table(name = undefined) {
@@ -380,7 +379,9 @@ class Query {
   }
 
   get() {
-    //STUB
+    return new Promise((resolve, reject) => {
+      if(!this.type) { reject(Error('Query.get: no query type selected'))}
+    });
   }
 }
 
