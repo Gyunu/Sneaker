@@ -1169,6 +1169,52 @@ describe('Query.buildDeleteSQL', function() {
   });
 });
 
+describe('Query.limit', function() {
+  it('Should throw an error if limit is not a number', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    expect(() => query.limit('error')).to.throw(Error);
+  });
+  it('Should set the limit to the value passed', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1).limit(1);
+    expect(query.limitValue).to.equal(1);
+  });
+  it('Should add a limit clause to the returned SQL', function() {
+    let sql = `SELECT test.'id' FROM test WHERE test.'id' = :test_id LIMIT 1`;
+    let build = Query.table('test').select('id').from('test').where('id').equals(1).limit(1).buildSQL();
+    expect(build.sql == sql).to.equal(true);
+  });
+  it('Should return itself', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let q = query.limit(1);
+
+    expect(q).to.equal(query);
+
+  });
+});
+
+describe('Query.offset', function() {
+  it('Should throw an error if offset is not a number', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    expect(() => query.offset('error')).to.throw(Error);
+  });
+  it('Should set the offset value if passed', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1).offset(1);
+    expect(query.offsetValue).to.equal(1);
+  });
+  it('Should add a offset clause to the returned SQL', function() {
+    let sql = `SELECT test.'id' FROM test WHERE test.'id' = :test_id OFFSET 1`;
+    let build = Query.table('test').select('id').from('test').where('id').equals(1).offset(1).buildSQL();
+    expect(build.sql == sql).to.equal(true);
+  });
+  it('Should return itself', function() {
+    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let q = query.offset(1);
+
+    expect(q).to.equal(query);
+
+  });
+});
+
 describe('Query.get', function() {
   it('Should return a promise', function() {
     let query = Query.table('test').select('id').from('test').where('id').equals(1);

@@ -1,10 +1,9 @@
-let Article = require('./models/article.model');
-let Databases = require('./databases');
+//TODO error manager
+//TODO .ENV file
+//TODO folder locations in config file. sql save location (database) in config file.
+//TODO utilities like load directory
+//TODO add database to query
+//TODO fix the way model calls query
 
-Article.find(1).with('author').get().then((results) => {
-  console.dir(results[0].attributes);
-});
-//
-// var Server = require('./sneaker/server');
-//
-// Server.listen();
+var Server = require('./sneaker/server');
+Server.listen();

@@ -1,0 +1,13 @@
+{
+  "name": "articles",
+  "fillable": [],
+  "hidden": [],
+  "database": "test",
+  "table": "articles",
+  "relationships": {
+    "author": {
+      "primary": "author_id",
+      "foreign": "id"
+    }
+  }
+}

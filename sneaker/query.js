@@ -1,5 +1,3 @@
-let Databases = require('../databases');
-
 const QueryType = {
   SELECT: 1,
   UPDATE: 2,
@@ -9,7 +7,8 @@ const QueryType = {
 
 class Query {
   constructor(options = {
-    table: null
+    table: null,
+    database: null
   }) {
 
     let _selects = {
@@ -21,6 +20,10 @@ class Query {
     let _inserts = [];
     let _type = null;
     let _table = options.table;
+    let _database = options.database;
+
+    let _limitValue = null;
+    let _offsetValue = null;
 
     Object.defineProperty(this, 'table', {
       enumerable: true,
@@ -81,6 +84,33 @@ class Query {
         _inserts = value;
       }
     });
+
+    Object.defineProperty(this, 'database', {
+      enumerable: true,
+      get() {
+        return _database;
+      }
+    });
+
+    Object.defineProperty(this, 'limitValue', {
+      enumerable: true,
+      get() {
+        return _limitValue;
+      },
+      set(value) {
+        _limitValue = parseInt(value, 10);
+      }
+    });
+
+    Object.defineProperty(this, 'offsetValue', {
+      enumerable: true,
+      get() {
+        return _offsetValue;
+      },
+      set(value) {
+        _offsetValue = parseInt(value, 10);
+      }
+    })
   }
 
   static table(name = undefined) {
@@ -372,15 +402,36 @@ class Query {
     query += ' ' + queryWhere.sql;
     query = query.trim();
 
+    if(this.limitValue) { query += ` LIMIT ${this.limitValue}`}
+    if(this.offsetValue) { query += ` OFFSET ${this.offsetValue}`}
+
     return {
       sql: query,
       binds: binds
     };
   }
 
+  limit(value = null) {
+    if(value.constructor !== Number) { throw new Error('Query.limit: Limit is not a number')}
+
+    this.limitValue = value;
+    return this;
+  }
+
+  offset(value = null) {
+    if(value.constructor !== Number) { throw new Error('Query.offset: offset is not a number')}
+
+    this.offsetValue = value;
+    return this;
+  }
+
   get() {
     return new Promise((resolve, reject) => {
       if(!this.type) { reject(Error('Query.get: no query type selected'))}
+
+      //build SQL query
+      //run query against the database
+      //return results or error
     });
   }
 }

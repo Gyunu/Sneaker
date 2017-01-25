@@ -5,43 +5,65 @@ class Database  {
   constructor(options = {
     name: null
   }) {
-
     if(!options.name) { throw new Error("Database: name not defined")};
-
-    let _database = null;
-    let _databaseName = options.name;
 
     Object.defineProperty(this, 'database', {
       enumerable: true,
       get() {
         return _database;
+      },
+      set(value) {
+        _database = value;
       }
     });
 
-    Object.defineProperty(this, 'databaseName', {
+    Object.defineProperty(this, 'name', {
       enumerable: true,
       get() {
-        return _databaseName;
+        return _name;
       }
     });
 
+    let _database = null;
+    let _name = options.name;
+
+    this.open();
+  }
+
+  open() {
     try {
       let fileBuffer = fs.readFileSync('./sql/' + options.name + '.sqlite');
-      _database = new SQL.Database(fileBuffer);
+      this.database = new SQL.Database(fileBuffer);
+      return this;
     }
     catch (e) {
       if(e.code === 'ENOENT') {
         console.warn('Schema: Database file not found, creating in memory database that will be written to file name: ' + options.name);
-        _database = new SQL.Database();
+        this.database = new SQL.Database();
         this.save();
+        return this;
       }
     }
+  }
+
+  close() {
+    this.database.close();
   }
 
   save() {
     let data = this.database.export();
     let buffer = new Buffer(data);
     fs.writeFileSync('./sql/' + this.databaseName + '.sqlite', buffer);
+  }
+
+  exec() {
+    return new Promise((resolve, reject) => {
+
+    });
+  }
+
+  execSync() {
+
   }
 }
 
