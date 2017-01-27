@@ -11,66 +11,71 @@ describe('Query', function() {
 
 });
 
-describe('Query.table', function() {
-  it('Should throw an error if the table name has not been defined', function() {
-    expect(() => Query.table()).to.throw(Error);
+describe('Query.database', function() {
+  it('Should throw an error if the database name has not been defined', function() {
+    expect(() => Query.database()).to.throw(Error);
+  });
+  it('Should throw an error if the database name is not a string', function() {
+    expect(() => Query.database(1)).to.throw(Error);
+  });
+  it('Should return a table function', function() {
+    expect(Query.database('test')).to.have.property('table');
+    expect(Query.database('test').table).to.be.a('function');
+  });
+});
+
+describe('Query.database.table', function() {
+  it('Should throw an error if the table name is not defined', function() {
+    expect(() => Query.database('test').table()).to.throw(Error);
   });
   it('Should throw an error if the table name is not a string', function() {
-    expect(() => Query.table(1)).to.throw(Error);
+    expect(() => Query.database('test').table(1)).to.throw(Error);
   });
-  it('Should return an instance of Query', function() {
-    expect(Query.table('test') instanceof Query).to.equal(true);
+  it('Should return an instance of itself', function() {
+    let q = Query.database('test').table('articles');
+    expect(q instanceof Query).to.equal(true);
   });
 });
 
 describe('Query.select', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if another query type has been started', function() {
     expect(() => query.delete().where('id').equals(1).select('test')).to.throw(Error);
   });
-  it('Should return a from function', function() {
-    let q = query.select('test');
-    expect(q).to.have.property('from');
-    expect(q.from).to.be.a('function');
-  });
   it('Should add a new column to select if the argument is a string', function() {
-    query.select('test').from('tests');
+    query.select('test');
     expect(query.selects).to.have.property('columns');
     expect(query.selects.columns).to.include('test');
-    expect(query.selects).to.have.property('table');
-    expect(query.selects.table).to.equal('tests');
   });
   it('Should ignore non-string or non-array arguments', function() {
-    query.select(1).from('tests');
+    query.select(1);
     expect(query.selects.columns.length).to.equal(0);
   });
   it('Should add an array of column names to the selects', function() {
-    query.select(['test', 'title', 'author']).from('tests');
+    query.select(['test', 'title', 'author']);
     expect(query.selects).to.have.property('columns');
     expect(query.selects.columns).to.include('test');
     expect(query.selects.columns).to.include('title');
     expect(query.selects.columns).to.include('author');
-    expect(query.selects).to.have.property('table');
-    expect(query.selects.table).to.equal('tests');
   });
   it('Should ignore non-string elements of the array', function() {
-    query.select(['test', 1, 10]).from('tests');
+    query.select(['test', 1, 10]);
     expect(query.selects.columns).to.not.include(1);
     expect(query.selects.columns).to.not.include(10);
     expect(query.selects.columns).to.include('test');
   });
   it('Should ignore columns that are already in the array', function() {
-    query.select('test').from('tests');
+    query.select('test');
     expect(query.selects.columns.length).to.equal(1);
     query.select('test');
     expect(query.selects.columns.length).to.equal(1);
   });
   it('Should only add new array items', function() {
-    query.select('test').from('tests');
-    query.select(['test', 'title']).from('tests');
+    query.select('test');
+    query.select(['test', 'title']);
     expect(query.selects.columns.length).to.equal(2);
     expect(query.selects.columns).to.include('test');
     expect(query.selects.columns).to.include('title');
@@ -80,7 +85,7 @@ describe('Query.select', function() {
 describe('Query.where', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if a string is not passed', function() {
     expect(() => query.where(1)).to.throw(Error);
@@ -92,7 +97,7 @@ describe('Query.where', function() {
     describe('Query.where.equals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have added the column to the where object', function() {
         query.where('id').equals(1);
@@ -115,7 +120,7 @@ describe('Query.where', function() {
     describe('Query.where.notEquals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have added the column to the where object', function() {
         query.where('id').notEquals(1);
@@ -139,7 +144,7 @@ describe('Query.where', function() {
     describe('Query.where.lessThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have added the column to the where object', function() {
         query.where('id').lessThan(1);
@@ -163,7 +168,7 @@ describe('Query.where', function() {
     describe('Query.where.greaterThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have added the column to the where object', function() {
         query.where('id').greaterThan(1);
@@ -187,7 +192,7 @@ describe('Query.where', function() {
     describe('Query.where.like', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have added the column to the where object', function() {
         query.where('id').like(1);
@@ -207,7 +212,7 @@ describe('Query.where', function() {
     describe('Query.where.between', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should return an and function', function() {
         let q = query.where('test').between(1);
@@ -231,7 +236,7 @@ describe('Query.where', function() {
 describe('Query.andWhere', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if a string is not passed', function() {
     expect(() => query.andWhere(1)).to.throw(Error);
@@ -243,7 +248,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.equals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').equals(1);
@@ -268,7 +273,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.notEquals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').notEquals(1);
@@ -294,7 +299,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.lessThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').lessThan(1);
@@ -320,7 +325,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.greaterThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').greaterThan(1);
@@ -346,7 +351,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.like', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.andWhere('id').like(1);
@@ -368,7 +373,7 @@ describe('Query.andWhere', function() {
     describe('Query.andWhere.between', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should return an and function', function() {
         let q = query.andWhere('test').between(1);
@@ -392,7 +397,7 @@ describe('Query.andWhere', function() {
 describe('Query.orWhere', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if a string is not passed', function() {
     expect(() => query.orWhere(1)).to.throw(Error);
@@ -404,7 +409,7 @@ describe('Query.orWhere', function() {
     describe('Query.orWhere.equals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').equals(1);
@@ -429,7 +434,7 @@ describe('Query.orWhere', function() {
     describe('Query.orWhere.notEquals', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').notEquals(1);
@@ -455,7 +460,7 @@ describe('Query.orWhere', function() {
     describe('Query.orWhere.lessThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').lessThan(1);
@@ -481,7 +486,7 @@ describe('Query.orWhere', function() {
     describe('Query.orWhere.greaterThan', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').greaterThan(1);
@@ -507,7 +512,7 @@ describe('Query.orWhere', function() {
     describe('Query.andWhere.like', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should have created a valid where clause object', function() {
         query.orWhere('id').like(1);
@@ -529,7 +534,7 @@ describe('Query.orWhere', function() {
     describe('Query.andWhere.between', function() {
       let query;
       beforeEach(function(){
-        query = new Query();
+        query = Query.database('test').table('articles');
       });
       it('Should return an and function', function() {
         let q = query.andWhere('test').between(1);
@@ -552,11 +557,11 @@ describe('Query.orWhere', function() {
 
 describe('Query.update', function() {
   it('Should throw an error if another query type has been started', function() {
-    let query = Query.table('test');
+    let query = Query.database('test').table('articles');
     expect(() => query.delete().where('id').equals(1).update('test')).to.throw(Error);
   });
   it('Should add new columns to the update object', function() {
-    let query = Query.table('test');
+    let query = Query.database('test').table('articles');
     query.update({
       'id': 1,
       'title': 'test'
@@ -568,7 +573,7 @@ describe('Query.update', function() {
     expect(query.updates.title).to.equal('test');
   });
   it('Should add more columns with successive update calls', function() {
-    let query = Query.table('test');
+    let query = Query.database('test').table('articles');
     query.update({
       'id': 1,
       'title': 'test'
@@ -587,7 +592,7 @@ describe('Query.update', function() {
 
   });
   it('Should overwrite already set columns with a new value', function() {
-    let query = Query.table('test');
+    let query = Query.database('test').table('articles');
     query.update({
       'id': 1,
       'title': 'test'
@@ -607,7 +612,7 @@ describe('Query.update', function() {
 describe('Query.insert', function() {
   let query;
   beforeEach(function() {
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if another query type has been started', function() {
     expect(() => query.delete().where('id').equals(1).insert({
@@ -644,7 +649,7 @@ describe('Query.insert', function() {
 describe('Query.delete', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should throw an error if another query type has been started', function() {
     expect(() => query.select('id').where('id').equals(1).delete()).to.throw(Error);
@@ -659,181 +664,181 @@ describe('Query.delete', function() {
 describe('Query.buildSQL', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should return an object', function() {
-    query.select('id').from('tests').where('id').equals(1);
+    query.select('id').where('id').equals(1);
     let build = query.buildSQL();
     expect(build).to.have.property('sql');
     expect(build.sql).to.be.a('string');
     expect(build).to.have.property('binds');
   });
   it('Should return a correct select and where clause (SELECT equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' = :articles_id`;
+    let build = query.select(['id', 'title']).where('id').equals(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' != :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('id').notEquals(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' != :articles_id`;
+    let build = query.select(['id', 'title']).where('id').notEquals(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' > :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('id').greaterThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' > :articles_id`;
+    let build = query.select(['id', 'title']).where('id').greaterThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' < :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('id').lessThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' < :articles_id`;
+    let build = query.select(['id', 'title']).where('id').lessThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where clause (SELECT like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' like :tests_title`;
-    let build = query.select(['id', 'title']).from('tests').where('title').like('test').buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' like :articles_title`;
+    let build = query.select(['id', 'title']).where('title').like('test').buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('%test%');
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('%test%');
   });
   it('Should return a correct select and whereBetween clause (SELECT whereBetween)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' BETWEEN :tests_id_start AND :tests_id_end`;
-    let build = query.select(['id', 'title']).from('tests').where('id').between(1).and(100).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' BETWEEN :articles_id_start AND :articles_id_end`;
+    let build = query.select(['id', 'title']).where('id').between(1).and(100).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id_start');
-    expect(build.binds[':tests_id_start']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_id_end');
-    expect(build.binds[':tests_id_end']).to.equal(100);
+    expect(build.binds).to.have.property(':articles_id_start');
+    expect(build.binds[':articles_id_start']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id_end');
+    expect(build.binds[':articles_id_end']).to.equal(100);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id AND tests.'title' = :tests_title`;
-    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').equals('test').buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' = :articles_id AND articles.'title' = :articles_title`;
+    let build = query.select(['id', 'title']).where('id').equals(1).andWhere('title').equals('test').buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
 
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id AND tests.'title' != :tests_title`;
-    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).andWhere('title').notEquals('test').buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' = :articles_id AND articles.'title' != :articles_title`;
+    let build = query.select(['id', 'title']).where('id').equals(1).andWhere('title').notEquals('test').buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' > :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').greaterThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title AND articles.'id' > :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').andWhere('id').greaterThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' < :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').lessThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title AND articles.'id' < :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').andWhere('id').lessThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals andWhere like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title AND tests.'id' like :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').andWhere('id').like(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title AND articles.'id' like :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').andWhere('id').like(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal('%1%');
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal('%1%');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere equals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id OR tests.'title' = :tests_title`;
-    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').equals('test').buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' = :articles_id OR articles.'title' = :articles_title`;
+    let build = query.select(['id', 'title']).where('id').equals(1).orWhere('title').equals('test').buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere notEquals)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'id' = :tests_id OR tests.'title' != :tests_title`;
-    let build = query.select(['id', 'title']).from('tests').where('id').equals(1).orWhere('title').notEquals('test').buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'id' = :articles_id OR articles.'title' != :articles_title`;
+    let build = query.select(['id', 'title']).where('id').equals(1).orWhere('title').notEquals('test').buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' > :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').greaterThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title OR articles.'id' > :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').orWhere('id').greaterThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere lessThan)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' < :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').lessThan(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title OR articles.'id' < :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').orWhere('id').lessThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct select and where, andWhere clause (SELECT equals orWhere like)', function() {
-    let sql = `SELECT tests.'id', tests.'title' FROM tests WHERE tests.'title' = :tests_title OR tests.'id' like :tests_id`;
-    let build = query.select(['id', 'title']).from('tests').where('title').equals('test').orWhere('id').like(1).buildSQL();
+    let sql = `SELECT articles.'id', articles.'title' FROM articles WHERE articles.'title' = :articles_title OR articles.'id' like :articles_id`;
+    let build = query.select(['id', 'title']).where('title').equals('test').orWhere('id').like(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal('%1%');
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal('%1%');
   });
   it('Should return a correct select and where, andwhere, andwhere clause (SELECT equals andWhere equals andWhere greaterThan)', function() {
-    let sql = `SELECT tests.'id' FROM tests WHERE tests.'title' = :tests_title AND tests.'author' = :tests_author AND tests.'id' > :tests_id`;
-    let build = query.select('id').from('tests').where('title').equals('test').andWhere('author').equals('dave').andWhere('id').greaterThan(1).buildSQL();
+    let sql = `SELECT articles.'id' FROM articles WHERE articles.'title' = :articles_title AND articles.'author' = :articles_author AND articles.'id' > :articles_id`;
+    let build = query.select('id').where('title').equals('test').andWhere('author').equals('dave').andWhere('id').greaterThan(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
-    expect(build.binds).to.have.property(':tests_author');
-    expect(build.binds[':tests_author']).to.equal('dave');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_author');
+    expect(build.binds[':articles_author']).to.equal('dave');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct SQL Update statement', function() {
-    let sql = `UPDATE test SET test.'id' = :update_id, test.'title' = :update_title WHERE test.'id' = :test_id`;
-    let build = Query.table('test').update({
+    let sql = `UPDATE articles SET articles.'id' = :update_id, articles.'title' = :update_title WHERE articles.'id' = :articles_id`;
+    let build = Query.database('test').table('articles').update({
       'id': 1,
       'title': 'test'
     }).where('id').equals(1).buildSQL();
@@ -841,17 +846,17 @@ describe('Query.buildSQL', function() {
     expect(build.sql == sql).to.equal(true);
   });
   it('Should return a correct SQL Insert statement', function() {
-    let sql = `INSERT INTO test (column_1, column_2) VALUES (:insert_column_1_0, :insert_column_2_0)`;
+    let sql = `INSERT INTO articles (column_1, column_2) VALUES (:insert_column_1_0, :insert_column_2_0)`;
 
-    let build = Query.table('test').insert([
+    let build = Query.database('test').table('articles').insert([
       {column_1: 'test', column_2: 'test_1'}
     ]).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
   });
   it('Should return a correct SQL Delete statement', function() {
-    let sql = `DELETE FROM test WHERE test.'id' = :test_id`;
-    let build = Query.table('test').delete().where('id').equals(1).buildSQL();
+    let sql = `DELETE FROM articles WHERE articles.'id' = :articles_id`;
+    let build = Query.database('test').table('articles').delete().where('id').equals(1).buildSQL();
 
     expect(build.sql == sql).to.equal(true);
   });
@@ -860,31 +865,31 @@ describe('Query.buildSQL', function() {
 describe('Query.buildSelectSQL', function() {
   let query;
   beforeEach(function(){
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should return a string', function() {
-    query.select('id').from('tests').where('id').equals(1);
+    query.select('id').where('id').equals(1);
     expect(query.buildSelectSQL()).to.be.a('string');
   });
   it('Should return a correct SQL Select statement (string)', function() {
-    query.select('id').from('tests').where('id').equals(1);
-    let sql = `SELECT tests.'id' FROM tests`;
+    query.select('id').where('id').equals(1);
+    let sql = `SELECT articles.'id' FROM articles`;
     expect(query.buildSelectSQL() == sql).to.equal(true);
   });
   it('Should return a correct SQL Select statement (array)', function() {
-    let query = new Query().select(['id', 'test', 'title']).from('tests').where('id').equals(1);
-    let sql = `SELECT tests.'id', tests.'test', tests.'title' FROM tests`;
-    expect(query.buildSelectSQL() == sql).to.equal(true);
+    let q = query.select(['id', 'test', 'title']).where('id').equals(1);
+    let sql = `SELECT articles.'id', articles.'test', articles.'title' FROM articles`;
+    expect(q.buildSelectSQL() == sql).to.equal(true);
   });
 });
 
 describe('Query.buildWhereSQL', function() {
   let query;
   beforeEach(function() {
-    query = new Query();
+    query = Query.database('test').table('articles');
   });
   it('Should return an object with sql and binds', function() {
-    query.select('id').from('tests').where('id').equals(1);
+    query.select('id').where('id').equals(1);
 
     let build = query.buildWhereSQL();
     expect(build).to.have.property('sql');
@@ -892,200 +897,200 @@ describe('Query.buildWhereSQL', function() {
     expect(build).to.have.property('binds');
   });
   it('Should return a correct SQL Where statement (equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id`;
-    query.select('id').from('tests').where('id').equals(1);
+    let sql = `WHERE articles.'id' = :articles_id`;
+    query.select('id').where('id').equals(1);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
 
   });
   it('Should return a correct SQL Where statement (notEquals)', function() {
-    let sql = `WHERE tests.'id' != :tests_id`;
-    query.select('id').from('tests').where('id').notEquals(1);
+    let sql = `WHERE articles.'id' != :articles_id`;
+    query.select('id').where('id').notEquals(1);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
 
   });
   it('Should return a correct SQL Where statement (greaterThan)', function() {
-    let sql = `WHERE tests.'id' > :tests_id`;
-    query.select('id').from('tests').where('id').greaterThan(1);
+    let sql = `WHERE articles.'id' > :articles_id`;
+    query.select('id').where('id').greaterThan(1);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct SQL Where statement (lessthan)', function() {
-    let sql = `WHERE tests.'id' < :tests_id`;
-    query.select('id').from('tests').where('id').lessThan(1);
+    let sql = `WHERE articles.'id' < :articles_id`;
+    query.select('id').where('id').lessThan(1);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
   });
   it('Should return a correct SQL Where statement (like)', function() {
-    let sql = `WHERE tests.'id' like :tests_id`;
-    query.select('id').from('tests').where('id').like(1);
+    let sql = `WHERE articles.'id' like :articles_id`;
+    query.select('id').where('id').like(1);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal('%1%');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal('%1%');
   });
   it('Should return a correct SQL Where statement (andWhere equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' = :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).andWhere('title').equals('test');
+    let sql = `WHERE articles.'id' = :articles_id AND articles.'title' = :articles_title`;
+    query.select('id').where('id').equals(1).andWhere('title').equals('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (andWhere notEquals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' != :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).andWhere('title').notEquals('test');
+    let sql = `WHERE articles.'id' = :articles_id AND articles.'title' != :articles_title`;
+    query.select('id').where('id').equals(1).andWhere('title').notEquals('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (andWhere lessThan)', function() {
-    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' < :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).andWhere('title').lessThan(100);
+    let sql = `WHERE articles.'id' = :articles_id AND articles.'title' < :articles_title`;
+    query.select('id').where('id').equals(1).andWhere('title').lessThan(100);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal(100);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal(100);
   });
   it('Should return a correct SQL Where statement (andWhere like)', function() {
-    let sql = `WHERE tests.'id' = :tests_id AND tests.'title' like :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).andWhere('title').like('test');
+    let sql = `WHERE articles.'id' = :articles_id AND articles.'title' like :articles_title`;
+    query.select('id').where('id').equals(1).andWhere('title').like('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('%test%');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('%test%');
   });
 
   it('Should return a correct SQL Where statement (orWhere equals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' = :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).orWhere('title').equals('test');
+    let sql = `WHERE articles.'id' = :articles_id OR articles.'title' = :articles_title`;
+    query.select('id').where('id').equals(1).orWhere('title').equals('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (orWhere notEquals)', function() {
-    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' != :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).orWhere('title').notEquals('test');
+    let sql = `WHERE articles.'id' = :articles_id OR articles.'title' != :articles_title`;
+    query.select('id').where('id').equals(1).orWhere('title').notEquals('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('test');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('test');
   });
   it('Should return a correct SQL Where statement (orWhere lessThan)', function() {
-    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' < :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).orWhere('title').lessThan(100);
+    let sql = `WHERE articles.'id' = :articles_id OR articles.'title' < :articles_title`;
+    query.select('id').where('id').equals(1).orWhere('title').lessThan(100);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal(100);
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal(100);
   });
   it('Should return a correct SQL Where statement (orWhere like)', function() {
-    let sql = `WHERE tests.'id' = :tests_id OR tests.'title' like :tests_title`;
-    query.select('id').from('tests').where('id').equals(1).orWhere('title').like('test');
+    let sql = `WHERE articles.'id' = :articles_id OR articles.'title' like :articles_title`;
+    query.select('id').where('id').equals(1).orWhere('title').like('test');
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id');
-    expect(build.binds[':tests_id']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_title');
-    expect(build.binds[':tests_title']).to.equal('%test%');
+    expect(build.binds).to.have.property(':articles_id');
+    expect(build.binds[':articles_id']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_title');
+    expect(build.binds[':articles_title']).to.equal('%test%');
   });
   it('Should return a correct SQL Where statement (whereBetween)', function() {
-    let sql = `WHERE tests.'id' BETWEEN :tests_id_start AND :tests_id_end`;
-    query.select('id').from('tests').where('id').between(1).and(100);
+    let sql = `WHERE articles.'id' BETWEEN :articles_id_start AND :articles_id_end`;
+    query.select('id').where('id').between(1).and(100);
 
     let build = query.buildWhereSQL();
 
     expect(build).to.have.property('sql');
     expect(build.sql == sql).to.equal(true);
     expect(build).to.have.property('binds');
-    expect(build.binds).to.have.property(':tests_id_start');
-    expect(build.binds[':tests_id_start']).to.equal(1);
-    expect(build.binds).to.have.property(':tests_id_end');
-    expect(build.binds[':tests_id_end']).to.equal(100);
+    expect(build.binds).to.have.property(':articles_id_start');
+    expect(build.binds[':articles_id_start']).to.equal(1);
+    expect(build.binds).to.have.property(':articles_id_end');
+    expect(build.binds[':articles_id_end']).to.equal(100);
   });
 });
 
 describe('Query.buildUpdateSQL', function() {
   let query;
   beforeEach(function() {
-    query = Query.table('test');
+    query = Query.database('test').table('articles');
   });
   it('Should return an object with binds and sql', function() {
     let build = query.update({
@@ -1099,7 +1104,7 @@ describe('Query.buildUpdateSQL', function() {
     expect(build.binds).to.be.an('object');
   });
   it('Should return a valid SQL update statement', function() {
-    let sql = `UPDATE test SET test.'column_1' = :update_column_1, test.'column_2' = :update_column_2`;
+    let sql = `UPDATE articles SET articles.'column_1' = :update_column_1, articles.'column_2' = :update_column_2`;
     let build = query.update({
       'column_1': 'test',
       'column_2': 'test_2'
@@ -1112,7 +1117,7 @@ describe('Query.buildUpdateSQL', function() {
 describe('Query.buildInsertSQL', function() {
   let query;
   beforeEach(function() {
-    query = Query.table('test');
+    query = Query.database('test').table('articles');
   });
   it('Should return an object', function() {
     query.insert([{
@@ -1127,7 +1132,7 @@ describe('Query.buildInsertSQL', function() {
     expect(build.binds).to.be.an('object');
   });
   it('Should return a valid SQL insert statement (single)', function() {
-    let sql = `INSERT INTO test (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0)`;
+    let sql = `INSERT INTO articles (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0)`;
     query.insert([{
       'id': 1,
       'title': 'test',
@@ -1138,7 +1143,7 @@ describe('Query.buildInsertSQL', function() {
     expect(build.sql == sql).to.equal(true);
   });
   it('Should return a valid SQL insert statement (array)', function() {
-    let sql = `INSERT INTO test (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0), (:insert_id_1, :insert_title_1, :insert_copy_1)`;
+    let sql = `INSERT INTO articles (id, title, copy) VALUES (:insert_id_0, :insert_title_0, :insert_copy_0), (:insert_id_1, :insert_title_1, :insert_copy_1)`;
     query.insert([
       {'id': 1, 'title': 'test', 'copy': 'test copy'},
       {'id': 2, 'title': 'test_2', 'copy': 'test copy 2'}
@@ -1152,7 +1157,7 @@ describe('Query.buildInsertSQL', function() {
 describe('Query.buildDeleteSQL', function() {
   let query;
   beforeEach(function() {
-    query = Query.table('test');
+    query = Query.database('test').table('articles');
   });
   it('Should return an object with an sql property', function() {
     query.delete().where('id').equals(1);
@@ -1161,7 +1166,7 @@ describe('Query.buildDeleteSQL', function() {
     expect(build.sql).to.be.a('string');
   });
   it('Should return a valid SQL delete statement', function() {
-    let sql = `DELETE FROM test`;
+    let sql = `DELETE FROM articles`;
     query.delete().where('id').equals(1);
 
     let build = query.buildDeleteSQL();
@@ -1171,20 +1176,20 @@ describe('Query.buildDeleteSQL', function() {
 
 describe('Query.limit', function() {
   it('Should throw an error if limit is not a number', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1);
     expect(() => query.limit('error')).to.throw(Error);
   });
   it('Should set the limit to the value passed', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1).limit(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1).limit(1);
     expect(query.limitValue).to.equal(1);
   });
   it('Should add a limit clause to the returned SQL', function() {
-    let sql = `SELECT test.'id' FROM test WHERE test.'id' = :test_id LIMIT 1`;
-    let build = Query.table('test').select('id').from('test').where('id').equals(1).limit(1).buildSQL();
+    let sql = `SELECT articles.'id' FROM articles WHERE articles.'id' = :articles_id LIMIT 1`;
+    let build = Query.database('test').table('articles').select('id').where('id').equals(1).limit(1).buildSQL();
     expect(build.sql == sql).to.equal(true);
   });
   it('Should return itself', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1);
     let q = query.limit(1);
 
     expect(q).to.equal(query);
@@ -1194,20 +1199,20 @@ describe('Query.limit', function() {
 
 describe('Query.offset', function() {
   it('Should throw an error if offset is not a number', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1);
     expect(() => query.offset('error')).to.throw(Error);
   });
   it('Should set the offset value if passed', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1).offset(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1).offset(1);
     expect(query.offsetValue).to.equal(1);
   });
   it('Should add a offset clause to the returned SQL', function() {
-    let sql = `SELECT test.'id' FROM test WHERE test.'id' = :test_id OFFSET 1`;
-    let build = Query.table('test').select('id').from('test').where('id').equals(1).offset(1).buildSQL();
+    let sql = `SELECT articles.'id' FROM articles WHERE articles.'id' = :articles_id OFFSET 1`;
+    let build = Query.database('test').table('articles').select('id').where('id').equals(1).offset(1).buildSQL();
     expect(build.sql == sql).to.equal(true);
   });
   it('Should return itself', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1);
     let q = query.offset(1);
 
     expect(q).to.equal(query);
@@ -1217,20 +1222,39 @@ describe('Query.offset', function() {
 
 describe('Query.get', function() {
   it('Should return a promise', function() {
-    let query = Query.table('test').select('id').from('test').where('id').equals(1);
+    let query = Query.database('test').table('articles').select('id').where('id').equals(1);
     expect(query.get() instanceof Promise).to.equal(true);
   });
   it('Should reject the promise if there is no type', function() {
-    let query = Query.table('test');
+    let query = Query.database('test').table('articles');
     return expect(query.get()).to.eventually.be.rejected;
   });
+  it('Should return an object with data and metadata', function() {
+    let query = Query.database('test').table('articles').select('id').where('id').greaterThan(0).get();
+    return Promise.all([
+      expect(query).to.eventually.have.property('data'),
+      expect(query).to.eventually.have.property('metadata')
+    ])
+  });
   it('Should return results if there are any', function() {
-    //stub
+    let query = Query.database('test').table('articles').select('id').where('id').greaterThan(0).get();
+    return Promise.all([
+      expect(query).to.eventually.have.property('data').and.lengthOf(1000)
+    ])
   });
   it('Should return an empty results set if there are no results', function() {
-    //stub
+    let query = Query.database('test').table('articles').select('id').where('id').greaterThan(1000).get();
+    return Promise.all([
+      expect(query).to.eventually.have.property('data').and.lengthOf(0)
+    ])
   });
-  it('Should return some metadata about the query', function() {
-    //stub
+  it('Should have a metadata object with properties', function() {
+    let query = Query.database('test').table('articles').select('id').where('id').greaterThan(0).get();
+    return Promise.all([
+      expect(query).to.eventually.have.property('metadata').and.have.property('sql').and.to.equal(`SELECT articles.'id' FROM articles WHERE articles.'id' > :articles_id`),
+      expect(query).to.eventually.have.property('metadata').and.have.property('binds').and.to.have.property(':articles_id').and.to.equal(0),
+      expect(query).to.eventually.have.property('metadata').and.have.property('rowsModified').and.to.equal(0),
+      expect(query).to.eventually.have.property('metadata').and.have.property('executionTime').and.to.be.above(0)
+    ])
   });
 });

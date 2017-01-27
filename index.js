@@ -2,8 +2,9 @@
 //TODO .ENV file
 //TODO folder locations in config file. sql save location (database) in config file.
 //TODO utilities like load directory
-//TODO add database to query
-//TODO fix the way model calls query
+//TODO move over to alasql it's better https://github.com/agershun/alasql
+
+
 
 var Server = require('./sneaker/server');
 Server.listen();

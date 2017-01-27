@@ -32,13 +32,13 @@ class Database  {
 
   open() {
     try {
-      let fileBuffer = fs.readFileSync('./sql/' + options.name + '.sqlite');
+      let fileBuffer = fs.readFileSync('./sql/' + this.name + '.sqlite');
       this.database = new SQL.Database(fileBuffer);
       return this;
     }
     catch (e) {
       if(e.code === 'ENOENT') {
-        console.warn('Schema: Database file not found, creating in memory database that will be written to file name: ' + options.name);
+        console.warn('Schema: Database file not found, creating in memory database that will be written to file name: ' + this.name);
         this.database = new SQL.Database();
         this.save();
         return this;
@@ -56,8 +56,32 @@ class Database  {
     fs.writeFileSync('./sql/' + this.databaseName + '.sqlite', buffer);
   }
 
-  exec() {
+  exec(sql, binds) {
+    let t0 = process.hrtime();
+
     return new Promise((resolve, reject) => {
+
+      let stmt = this.database.prepare(sql);
+      stmt.bind(binds);
+
+      let results = [];
+      while(stmt.step()) {
+        let row = stmt.getAsObject();
+        results.push(row);
+      };
+
+      let object = {};
+      object.data = results;
+      object.metadata = {};
+      object.metadata.sql = sql;
+      object.metadata.binds = binds;
+      object.metadata.rowsModified = this.database.getRowsModified();
+
+      stmt.free();
+
+      object.metadata.executionTime = (process.hrtime(t0)[1]);
+
+      resolve(object);
 
     });
   }

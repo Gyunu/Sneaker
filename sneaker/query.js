@@ -1,3 +1,5 @@
+const DatabaseManager = require('./database.manager');
+
 const QueryType = {
   SELECT: 1,
   UPDATE: 2,
@@ -113,16 +115,22 @@ class Query {
     })
   }
 
-  static table(name = undefined) {
-    if(!name) { throw new Error('Query.table: No table name passed')}
-    if(typeof name !== 'string') { throw new Error('Query.table: Table name is not a string')}
+  static database(name = undefined) {
+    if(!name) { throw new Error('Query.database: no database name passed')}
+    if(name.constructor !== String) { throw new Error('Query.database: Database name is not a string')}
 
-    let instance = new this({
-      table: name
-    });
+    return {
+      table: (table = undefined) => {
+        if(!table) { throw new Error('Query.table: no table name passed')}
+        if(table.constructor !== String) { throw new Error('Query.table: table name is not a string')}
 
-    return instance;
-
+        let instance = new this({
+          database: name,
+          table: table
+        });
+        return instance;
+      }
+    }
   }
 
   insert(insertArray) {
@@ -148,32 +156,27 @@ class Query {
     if(this.type && this.type !== QueryType.SELECT) { throw new Error('Query.select: Query is of type ', this.type)}
     this.type = QueryType.SELECT;
 
-    return {
-      from: (table) => {
-        let columns = [];
-        this.table = table;
+    let columns = [];
 
-        if(column.constructor === String) {
-          if(!this.selects.columns.includes(column)) {
-            columns = [column];
-          }
-        }
-        if(column.constructor === Array) {
-          columns = column.filter((col) => {
-            if(!this.selects.columns.includes(col) && col.constructor === String) { return col; }
-          });
-        }
-
-        columns = this.selects.columns.concat(columns);
-        let selectClause = {
-          columns: columns,
-          table: table
-        }
-
-        this.selects = selectClause;
-        return this;
+    if(column.constructor === String) {
+      if(!this.selects.columns.includes(column)) {
+        columns = [column];
       }
     }
+    if(column.constructor === Array) {
+      columns = column.filter((col) => {
+        if(!this.selects.columns.includes(col) && col.constructor === String) { return col; }
+      });
+    }
+
+    columns = this.selects.columns.concat(columns);
+    let selectClause = {
+      columns: columns
+    }
+
+    this.selects = selectClause;
+    return this;
+
   }
 
   update(update = undefined) {
@@ -308,12 +311,12 @@ class Query {
     let query = `SELECT `;
 
     query += this.selects.columns.reduce((acc, column) => {
-      return acc + `${this.selects.table}.'${column}', `;
+      return acc + `${this.table}.'${column}', `;
     }, '');
 
     //remove trailing comma and space.
     query = query.slice(0, -2);
-    query += ` FROM ${this.selects.table}`;
+    query += ` FROM ${this.table}`;
 
     return query;
   }
@@ -427,11 +430,16 @@ class Query {
 
   get() {
     return new Promise((resolve, reject) => {
-      if(!this.type) { reject(Error('Query.get: no query type selected'))}
+      if(!this.type) {
+        reject(Error('Query.get: no query type selected'));
+        return;
+      }
 
-      //build SQL query
-      //run query against the database
-      //return results or error
+      let query = this.buildSQL();
+      DatabaseManager.databases[this.database].exec(query.sql, query.binds)
+      .then((results) => {
+        resolve(results);
+      });
     });
   }
 }

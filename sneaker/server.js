@@ -68,7 +68,6 @@ class Server {
         DatabaseManager.loadDatabase({
           name: database.name
         });
-        console.log('dbs', DatabaseManager.databases);
       }
     });
     console.log('Sneaker: Routes Databases');
